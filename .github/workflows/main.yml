@@ -20,9 +20,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run test
-        env:
-          pytest_github_report: true
         working-directory: ./test
         run: |
-          pip install pytest-github-report pytest-cov
+          pip install pytest-html pytest-cov
           pytest --cov=. --cov-report=html
