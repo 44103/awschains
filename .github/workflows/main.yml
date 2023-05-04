@@ -15,8 +15,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Run test
+      - name: Build Environment
         run: |
           pip install -r requirements.txt
-          cd test
+
+      - name: Run test
+        env:
+          pytest_github_report: true
+        working-directory: ./test
+        run: |
+          pip install pytest-github-report
           pytest
