@@ -23,7 +23,10 @@ def init_modules(request, monkeypatch):
     mock.start()
     table = data.setup_dynamodb_table()
     # DB初期化
-    [table.put_item(Item=d) for d in data.read_json("database/database")]
+    [
+        table.put_item(Item=d)
+        for d in data.read_json("database/database", float_as=Decimal)
+    ]
 
     request.instance.init = [data, table]
 
@@ -56,7 +59,7 @@ class TestWrapper:
         # 処理実行
         actual = db.scan()
         # 結果確認
-        expected = data.read_json("data/expected_scan")
+        expected = data.read_json("data/expected_scan", float_as=Decimal)
         assert expected == actual
 
     def test_case2(self):
