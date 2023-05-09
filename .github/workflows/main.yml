@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,18 +19,8 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Run Test
+      - name: Run test
         working-directory: ./test
         run: |
-          pip install pytest-report pytest-cov
-          pytest --durations=0 --junitxml=pytest.xml | tee pytest-coverage.txt
-      - name: Pytest Coverage Comment
-        id: coverageComment
-        uses: MishaKav/pytest-coverage-comment@main
-        with:
-          hide-comment: true
-          pytest-coverage-path: ./test/pytest.xml
-      - name: Write Job Summary
-        id: check_status
-        run: |
-          echo -e ${{ steps.coverageComment.outputs.summaryReport }} >> $GITHUB_STEP_SUMMARY
+          pip install pytest-html pytest-cov
+          pytest --cov=. --cov-report=html
