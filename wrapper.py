@@ -29,7 +29,7 @@ class DynamoChain:
 
     @property
     def done(self):
-        return "ExclusiveStartKey" in self._query
+        return not "ExclusiveStartKey" in self._query
 
     # Chain Method
     def key_condition(self, kce):
@@ -68,7 +68,7 @@ class DynamoChain:
 
     def count_all(self):
         resp = self.count()
-        while self.done:
+        while not self.done:
             resp += self.count()
         return resp
 
@@ -79,7 +79,7 @@ class DynamoChain:
 
     def scan_all(self):
         resp = self.scan()
-        while self.done:
+        while not self.done:
             resp += self.scan()
         return resp
 
@@ -90,6 +90,6 @@ class DynamoChain:
 
     def query_all(self):
         resp = self.query()
-        while self.done:
+        while not self.done:
             resp += self.query()
         return resp
