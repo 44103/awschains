@@ -27,9 +27,8 @@ def init_modules(request, monkeypatch):
         table.put_item(Item=d)
         for d in data.read_json("database/database", float_as=Decimal)
     ]
-    db = DynamoChain(table)
 
-    request.instance.init = [data, db]
+    request.instance.init = (data, table)
 
     yield
 
@@ -43,7 +42,8 @@ class TestWrapper:
         """Count"""
 
         # Module初期化
-        _, db = self.init
+        _, table = self.init
+        db = DynamoChain(table)
         # 処理実行
         actual = db.count()
         # 結果確認
@@ -54,7 +54,8 @@ class TestWrapper:
         """Scan"""
 
         # Module初期化
-        data, db = self.init
+        data, table = self.init
+        db = DynamoChain(table)
         # 処理実行
         actual = db.scan()
         # 結果確認
@@ -65,7 +66,8 @@ class TestWrapper:
         """Query"""
 
         # Module初期化
-        data, db = self.init
+        data, table = self.init
+        db = DynamoChain(table)
         # 処理実行
         actual = (
             db.key_condition(Key("ForumName").eq("Amazon DynamoDB"))
