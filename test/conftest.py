@@ -1,6 +1,6 @@
 def pytest_itemcollected(item):
     def collect_nodes(item, nodes=[]):
-        if not hasattr(item, "parent") or not hasattr(item.parent, "obj"):
+        if not (hasattr(item, "parent") and hasattr(item.parent, "obj")):
             return nodes
         nodes.append(item.obj)
         return collect_nodes(item.parent, nodes)
