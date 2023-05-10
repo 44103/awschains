@@ -6,7 +6,7 @@ import sys
 
 sys.path.append("../")
 
-from wrapper import MyDynamoDB
+from wrapper import DynamoChain
 
 
 @fixture(autouse=True)
@@ -27,8 +27,9 @@ def init_modules(request, monkeypatch):
         table.put_item(Item=d)
         for d in data.read_json("database/database", float_as=Decimal)
     ]
+    db = DynamoChain(table)
 
-    request.instance.init = [data, table]
+    request.instance.init = [data, db]
 
     yield
 
@@ -42,8 +43,7 @@ class TestWrapper:
         """Count"""
 
         # Module初期化
-        _, table = self.init
-        db = MyDynamoDB(table)
+        _, db = self.init
         # 処理実行
         actual = db.count()
         # 結果確認
@@ -54,8 +54,7 @@ class TestWrapper:
         """Scan"""
 
         # Module初期化
-        data, table = self.init
-        db = MyDynamoDB(table)
+        data, db = self.init
         # 処理実行
         actual = db.scan()
         # 結果確認
@@ -66,8 +65,7 @@ class TestWrapper:
         """Query"""
 
         # Module初期化
-        data, table = self.init
-        db = MyDynamoDB(table)
+        data, db = self.init
         # 処理実行
         actual = (
             db.key_condition(Key("ForumName").eq("Amazon DynamoDB"))

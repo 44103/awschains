@@ -1,7 +1,7 @@
 import operator
 
 
-class MyDynamoDB:
+class DynamoChain:
     def __init__(self, table) -> None:
         self._table = table
         self._query = {}
