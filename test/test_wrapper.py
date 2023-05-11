@@ -1,7 +1,8 @@
 from decimal import Decimal
+from typing import Type
 from moto import mock_dynamodb
 from boto3.dynamodb.conditions import Key, Attr
-from pytest import fixture
+from pytest import FixtureRequest, MonkeyPatch, fixture
 import sys
 
 sys.path.append("../")
@@ -10,7 +11,7 @@ from wrapper import DynamoChain
 
 
 @fixture(autouse=True)
-def init_modules(request, monkeypatch):
+def init_modules(request: Type[FixtureRequest], monkeypatch: MonkeyPatch):
     monkeypatch.setenv("AWS_ACCESS_KEY_ID", "dummy")
     monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "dummy")
     monkeypatch.setenv("AWS_DEFAULT_REGION", "ap-northeast-1")
