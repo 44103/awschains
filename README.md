@@ -2,7 +2,7 @@
 EN | [JA](/README.ja.md)
 
 ![Python](https://img.shields.io/badge/Python-3.9-blue?logo=python)
-[![CI](https://github.com/44103/pytest-essence/actions/workflows/main.yml/badge.svg)](https://github.com/44103/pytest-essence/actions/workflows/main.yml)
+[![CI](https://github.com/44103/awschain/actions/workflows/main.yml/badge.svg)](https://github.com/44103/awschain/actions/workflows/main.yml)
 
 -----
 
