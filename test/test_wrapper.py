@@ -77,6 +77,7 @@ class TestWrapper:
             .ior.filter(Attr("Views").eq(0))
             .limit(2)
             .desc()
+            .consistent_read(False)
             .query_all()
         )
         # 結果確認
