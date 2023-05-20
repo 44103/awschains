@@ -57,8 +57,8 @@ class DynamoChain:
     def desc(self):
         self._query["ScanIndexForward"] = False
         return self
-    
-    def consistent_read(self, cr):
+
+    def consistent_read(self, cr=True):
         self._query["ConsistentRead"] = cr
         return self
 
