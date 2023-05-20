@@ -48,7 +48,7 @@ class TestWrapper:
         # 処理実行
         actual = db.count()
         # 結果確認
-        expected = 3
+        expected = 4
         assert expected == actual
 
     def test_case1(self):
@@ -64,7 +64,7 @@ class TestWrapper:
         assert expected == actual
 
     def test_case2(self):
-        """Query"""
+        """Query1"""
 
         # Module初期化
         data, table = self.init
@@ -74,12 +74,31 @@ class TestWrapper:
             db.key_condition(Key("ForumName").eq("Amazon DynamoDB"))
             .key_condition(Key("Subject").gte("DynamoDB Thread 1"))
             .filter(Attr("LastPostedBy").eq("User A"))
-            .ior.filter(Attr("Views").eq(0))
+            .or_.filter(Attr("Views").eq(0))
             .limit(2)
             .desc()
             .consistent_read()
             .query_all()
         )
         # 結果確認
-        expected = data.read_json("data/expected_query", float_as=Decimal)
+        expected = data.read_json("data/expected_query1", float_as=Decimal)
+        assert expected == actual
+
+    def test_case3(self):
+        """Query2"""
+
+        # Module初期化
+        data, table = self.init
+        db = DynamoChain(table)
+        # 処理実行
+        actual = (
+            db.key_condition(Key("ForumName").eq("Amazon S3"))
+            .key_condition(Key("Subject").gte("S3 Thread 2"))
+            .filter(Attr("LastPostedBy").eq("User A"))
+            .and_.filter(Attr("Views").eq(1))
+            .desc()
+            .query_all()
+        )
+        # 結果確認
+        expected = data.read_json("data/expected_query2", float_as=Decimal)
         assert expected == actual
