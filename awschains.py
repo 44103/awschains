@@ -5,7 +5,7 @@ class DynamoChain:
     def __init__(self, table) -> None:
         self._table = table
         self._query = {}
-        self._operator = operator.iand
+        self._operator = operator.and_
 
     def _check_next_query(self, resp):
         if "LastEvaluetedKey" in resp:
@@ -15,16 +15,16 @@ class DynamoChain:
 
     def clear(self):
         self._query = {}
-        self._operator = operator.iand
+        self._operator = operator.and_
 
     @property
-    def iand(self):
-        self._operator = operator.iand
+    def and_(self):
+        self._operator = operator.and_
         return self
 
     @property
-    def ior(self):
-        self._operator = operator.ior
+    def or_(self):
+        self._operator = operator.or_
         return self
 
     @property
@@ -41,7 +41,7 @@ class DynamoChain:
 
     def filter(self, fe):
         if "FilterExpression" in self._query:
-            self._operator(self._query["FilterExpression"], fe)
+            self._query["FilterExpression"] = self._operator(self._query["FilterExpression"], fe)
         else:
             self._query["FilterExpression"] = fe
         return self
