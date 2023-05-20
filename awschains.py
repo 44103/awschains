@@ -58,6 +58,13 @@ class DynamoChain:
         self._query["ScanIndexForward"] = False
         return self
 
+    def key(self, key, value):
+        if "Key" in self._query:
+            self._query["Key"] |= {key: value}
+        else:
+            self._query["Key"] = {key: value}
+        return self
+
     def consistent_read(self, cr=True):
         self._query["ConsistentRead"] = cr
         return self
@@ -97,3 +104,6 @@ class DynamoChain:
         while not self.done:
             resp += self.query()
         return resp
+
+    def delete(self):
+        self._table.delete_item(**self._query)
