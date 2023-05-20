@@ -65,6 +65,10 @@ class DynamoChain:
             self._query["Key"] = {key: value}
         return self
 
+    def consistent_read(self, cr=True):
+        self._query["ConsistentRead"] = cr
+        return self
+
     # Last Method
     def count(self):
         self._query["Select"] = "COUNT"
