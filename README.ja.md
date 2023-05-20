@@ -22,7 +22,7 @@ AWS Chainsはboto3をメソッドチェーンで記述するためのラッパ�
       db.key_condition(Key("ForumName").eq("Amazon DynamoDB"))
       .key_condition(Key("Subject").gte("DynamoDB Thread 1"))
       .filter(Attr("LastPostedBy").eq("User A"))
-      .ior.filter(Attr("Views").eq(0))
+      .or_.filter(Attr("Views").eq(0))
       .limit(2)
       .desc()
       .query_all()
