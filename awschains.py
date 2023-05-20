@@ -58,6 +58,13 @@ class DynamoChain:
         self._query["ScanIndexForward"] = False
         return self
 
+    def key(self, key, value):
+        if "Key" in self._query:
+            self._query["Key"] |= {key: value}
+        else:
+            self._query["Key"] = {key: value}
+        return self
+
     # Last Method
     def count(self):
         self._query["Select"] = "COUNT"
@@ -93,3 +100,6 @@ class DynamoChain:
         while not self.done:
             resp += self.query()
         return resp
+
+    def delete(self):
+        self._table.delete_item(**self._query)
