@@ -115,3 +115,19 @@ class TestWrapper:
         actual = db.scan()
         expected = data.read_json("data/expected_delete", float_as=Decimal)
         assert expected == actual
+
+    def test_case5(self):
+        """Get"""
+
+        # Module初期化
+        data, table = self.init
+        db = DynamoChain(table)
+        # 処理実行
+        actual = (
+            db.key("ForumName", "Amazon DynamoDB")
+            .key("Subject", "DynamoDB Thread 1")
+            .get()
+        )
+        # 結果確認
+        expected = data.read_json("data/expected_get", float_as=Decimal)
+        assert expected == actual
