@@ -71,6 +71,13 @@ class DynamoChain:
         self._query["ConsistentRead"] = cr
         return self
 
+    def projection(self, pe):
+        if "ProjectionExpression" in self._query:
+            self._query["ProjectionExpression"] += ',' + pe
+        else:
+            self._query["ProjectionExpression"] = pe
+        return self
+
     # Last Method
     def count(self):
         self._query["Select"] = "COUNT"

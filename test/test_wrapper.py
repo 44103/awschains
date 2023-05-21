@@ -95,6 +95,8 @@ class TestWrapper:
             .key_condition(Key("Subject").gte("S3 Thread 2"))
             .filter(Attr("LastPostedBy").eq("User A"))
             .and_.filter(Attr("Views").eq(1))
+            .projection("ForumName, Subject, Message")
+            .projection("LastPostedBy, LastPostedDateTime,Views")
             .desc()
             .query_all()
         )
