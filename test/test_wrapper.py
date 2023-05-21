@@ -51,8 +51,8 @@ class TestWrapper:
         expected = 4
         assert expected == actual
 
-    def test_case1(self):
-        """Scan"""
+    def test_case_scan1(self):
+        """Scan1"""
 
         # Module初期化
         data, table = self.init
@@ -63,7 +63,7 @@ class TestWrapper:
         expected = data.read_json("data/expected_scan", float_as=Decimal)
         assert expected == actual
 
-    def test_case2(self):
+    def test_case_query1(self):
         """Query1"""
 
         # Module初期化
@@ -84,7 +84,7 @@ class TestWrapper:
         expected = data.read_json("data/expected_query1", float_as=Decimal)
         assert expected == actual
 
-    def test_case3(self):
+    def test_case_query2(self):
         """Query2"""
 
         # Module初期化
@@ -104,8 +104,8 @@ class TestWrapper:
         expected = data.read_json("data/expected_query2", float_as=Decimal)
         assert expected == actual
 
-    def test_case4(self):
-        """Delete"""
+    def test_case_delete1(self):
+        """Delete1"""
 
         # Module初期化
         data, table = self.init
