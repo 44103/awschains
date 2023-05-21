@@ -148,7 +148,7 @@ class TestWrapper:
         # 結果確認
         db.clear()
         actual = db.scan()
-        expected = data.read_json("data/expected_delete", float_as=Decimal)
+        expected = data.read_json("data/expected_delete1", float_as=Decimal)
         assert expected == actual
 
     def test_case5(self):
