@@ -118,4 +118,4 @@ class DynamoChain:
         self._table.delete_item(**ChainsConditionBuilder(self._query).query)
 
     def get(self):
-        return self._table.get_item(**self._query)["Item"]
+        return self._table.get_item(**ChainsConditionBuilder(self._query).query)["Item"]

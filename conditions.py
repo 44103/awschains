@@ -6,8 +6,6 @@ class ChainsConditionBuilder(ConditionExpressionBuilder):
         super().__init__()
         self._query = query
         self._pe_list = []
-        self._query["ExpressionAttributeNames"] = {}
-        self._query["ExpressionAttributeValues"] = {}
 
     def _build_key_condition_expression(self):
         if "KeyConditionExpression" not in self._query:
@@ -27,8 +25,8 @@ class ChainsConditionBuilder(ConditionExpressionBuilder):
         )
 
     def _save_expression_to_query(self, bce, key):
-        self._query["ExpressionAttributeNames"] |= bce.attribute_name_placeholders
-        self._query["ExpressionAttributeValues"] |= bce.attribute_value_placeholders
+        self.expression_attribute_names |= bce.attribute_name_placeholders
+        self.expression_attribute_values |= bce.attribute_value_placeholders
         self._query[key] = bce.condition_expression
 
     def _build_projection_expression(self):
@@ -43,15 +41,43 @@ class ChainsConditionBuilder(ConditionExpressionBuilder):
         self._query["ProjectionExpression"].replace(" ", "")
         self._pe_list = self._query["ProjectionExpression"].split(",")
         for pe in self._pe_list:
-            if pe not in self._query["ExpressionAttributeNames"].values():
+            if pe not in self.expression_attribute_names.values():
                 bce = self.build_expression(Attr(pe).eq("dummy"))
-                self._query["ExpressionAttributeNames"] |= bce.attribute_name_placeholders
+                self.expression_attribute_names |= bce.attribute_name_placeholders
 
     def _use_attr_names_for_pe(self):
-        reversed_attr_names = {v: k for k, v in self._query["ExpressionAttributeNames"].items()}
+        reversed_attr_names = {v: k for k, v in self.expression_attribute_names.items()}
         for i, pe in enumerate(self._pe_list):
             self._pe_list[i] = reversed_attr_names[pe]
         self._query["ProjectionExpression"] = ",".join(self._pe_list)
+
+    @property
+    def expression_attribute_names(self):
+        if "ExpressionAttributeNames" not in self._query:
+            return {}
+        else:
+            return self._query["ExpressionAttributeNames"]
+
+    @expression_attribute_names.setter
+    def expression_attribute_names(self, value):
+        if "ExpressionAttributeNames" not in self._query:
+            self._query["ExpressionAttributeNames"] = value
+        else:
+            self._query["ExpressionAttributeNames"] |= value
+
+    @property
+    def expression_attribute_values(self):
+        if "ExpressionAttributeValues" not in self._query:
+            return {}
+        else:
+            return self._query["ExpressionAttributeValues"]
+
+    @expression_attribute_values.setter
+    def expression_attribute_values(self, value):
+        if "ExpressionAttributeValues" not in self._query:
+            self._query["ExpressionAttributeValues"] = value
+        else:
+            self._query["ExpressionAttributeValues"] |= value
 
     @property
     def query(self):
