@@ -41,7 +41,9 @@ class DynamoChain:
 
     def filter(self, fe):
         if "FilterExpression" in self._query:
-            self._query["FilterExpression"] = self._operator(self._query["FilterExpression"], fe)
+            self._query["FilterExpression"] = self._operator(
+                self._query["FilterExpression"], fe
+            )
         else:
             self._query["FilterExpression"] = fe
         return self
@@ -107,3 +109,6 @@ class DynamoChain:
 
     def delete(self):
         self._table.delete_item(**self._query)
+
+    def get(self):
+        return self._table.get_item(**self._query)["Item"]

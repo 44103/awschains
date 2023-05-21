@@ -1,0 +1,15 @@
+{
+  "ForumName": "Amazon DynamoDB",
+  "Subject": "DynamoDB Thread 1",
+  "Message": "DynamoDB thread 1 message",
+  "LastPostedBy": "User A",
+  "LastPostedDateTime": "2015-09-22T19:58:22.514Z",
+  "Views": 0,
+  "Replies": 0,
+  "Answered": 0,
+  "Tags": [
+    "index",
+    "primarykey",
+    "table"
+  ]
+}
