@@ -34,7 +34,7 @@ class ChainsConditionBuilder(ConditionExpressionBuilder):
     def _build_projection_expression(self):
         if "ProjectionExpression" not in self._query:
             return
-        if type(self._query["ProjectionExpression"]) != str:
+        if type(self._query["ProjectionExpression"]) is not str:
             raise TypeError("ProjectionExpression should have str specified.")
         self._add_attr_names_from_pe()
         self._use_attr_names_for_pe()
