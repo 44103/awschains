@@ -13,17 +13,23 @@ class ChainsConditionBuilder(ConditionExpressionBuilder):
         if "KeyConditionExpression" not in self._query:
             return
         bce = self.build_expression(self._query["KeyConditionExpression"])
-        self._query["ExpressionAttributeNames"] |= bce.attribute_name_placeholders
-        self._query["ExpressionAttributeValues"] |= bce.attribute_value_placeholders
-        self._query["KeyConditionExpression"] = bce.condition_expression
+        self._save_expression_to_query(
+            self.build_expression(self._query["KeyConditionExpression"]),
+            "KeyConditionExpression"
+        )
 
     def _build_filter_expression(self):
         if "FilterExpression" not in self._query:
             return
-        bce = self.build_expression(self._query["FilterExpression"], is_key_condition= False)
+        self._save_expression_to_query(
+            self.build_expression(self._query["FilterExpression"], is_key_condition= False),
+            "FilterExpression"
+        )
+
+    def _save_expression_to_query(self, bce, key):
         self._query["ExpressionAttributeNames"] |= bce.attribute_name_placeholders
         self._query["ExpressionAttributeValues"] |= bce.attribute_value_placeholders
-        self._query["FilterExpression"] = bce.condition_expression
+        self._query[key] = bce.condition_expression
 
     def _build_projection_expression(self):
         if "ProjectionExpression" not in self._query:
