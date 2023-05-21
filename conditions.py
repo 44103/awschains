@@ -30,10 +30,10 @@ class ChainsConditionBuilder(ConditionExpressionBuilder):
             return
         if type(self._query["ProjectionExpression"]) != str:
             raise TypeError("ProjectionExpression should have str specified.")
-        self._add_pelist_to_atts()
-        self._convert_pelist_to_pe()
+        self._add_attr_names_from_pe()
+        self._use_attr_names_for_pe()
 
-    def _add_pelist_to_atts(self):
+    def _add_attr_names_from_pe(self):
         self._query["ProjectionExpression"].replace(" ", "")
         self._pe_list = self._query["ProjectionExpression"].split(",")
         for pe in self._pe_list:
@@ -41,7 +41,7 @@ class ChainsConditionBuilder(ConditionExpressionBuilder):
                 _, atts, _ = self.build_expression(Attr(pe).eq("dummy"))
                 self._query["ExpressionAttributeNames"] |= atts
 
-    def _convert_pelist_to_pe(self):
+    def _use_attr_names_for_pe(self):
         inverted_atts = {v: k for k, v in self._query["ExpressionAttributeNames"].items()}
         for i, pe in enumerate(self._pe_list):
             self._pe_list[i] = inverted_atts[pe]
