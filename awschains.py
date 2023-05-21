@@ -81,7 +81,7 @@ class DynamoChain:
     # Last Method
     def count(self):
         self._query["Select"] = "COUNT"
-        resp = self._table.scan(**self._query)
+        resp = self._table.scan(**ChainsConditionBuilder(self._query).query)
         self._check_next_query(resp)
         count = resp["Count"]
         return count

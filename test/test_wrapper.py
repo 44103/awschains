@@ -39,8 +39,8 @@ def init_modules(request: Type[FixtureRequest], monkeypatch: MonkeyPatch):
 class TestWrapper:
     """DynamoDB Wrapper"""
 
-    def test_case0(self):
-        """Count"""
+    def test_case_count1(self):
+        """Count1"""
 
         # Module初期化
         _, table = self.init
@@ -49,6 +49,22 @@ class TestWrapper:
         actual = db.count()
         # 結果確認
         expected = 4
+        assert expected == actual
+
+    def test_case_count2(self):
+        """Count2"""
+
+        # Module初期化
+        _, table = self.init
+        db = DynamoChain(table)
+        # 処理実行
+        actual = (
+            db.filter(Attr("LastPostedBy").eq("User A"))
+            .and_.filter(Attr("Views").eq(1))
+            .count_all()
+        )
+        # 結果確認
+        expected = 1
         assert expected == actual
 
     def test_case_scan1(self):
@@ -71,8 +87,7 @@ class TestWrapper:
         db = DynamoChain(table)
         # 処理実行
         actual = (
-            db
-            .filter(Attr("LastPostedBy").eq("User A"))
+            db.filter(Attr("LastPostedBy").eq("User A"))
             .and_.filter(Attr("Views").eq(1))
             .projection("ForumName, Subject, Message")
             .scan()
