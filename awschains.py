@@ -115,7 +115,7 @@ class DynamoChain:
         return resp
 
     def delete(self):
-        self._table.delete_item(**self._query)
+        self._table.delete_item(**ChainsConditionBuilder(self._query).query)
 
     def get(self):
         return self._table.get_item(**self._query)["Item"]
