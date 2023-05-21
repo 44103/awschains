@@ -38,13 +38,13 @@ class ChainsConditionBuilder(ConditionExpressionBuilder):
         self._pe_list = self._query["ProjectionExpression"].split(",")
         for pe in self._pe_list:
             if pe not in self._query["ExpressionAttributeNames"].values():
-                _, atts, _ = self.build_expression(Attr(pe).eq("dummy"))
-                self._query["ExpressionAttributeNames"] |= atts
+                bce = self.build_expression(Attr(pe).eq("dummy"))
+                self._query["ExpressionAttributeNames"] |= bce.attribute_name_placeholders
 
     def _use_attr_names_for_pe(self):
-        inverted_atts = {v: k for k, v in self._query["ExpressionAttributeNames"].items()}
+        reversed_attr_names = {v: k for k, v in self._query["ExpressionAttributeNames"].items()}
         for i, pe in enumerate(self._pe_list):
-            self._pe_list[i] = inverted_atts[pe]
+            self._pe_list[i] = reversed_attr_names[pe]
         self._query["ProjectionExpression"] = ",".join(self._pe_list)
 
     @property
