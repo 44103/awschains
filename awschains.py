@@ -119,3 +119,4 @@ class DynamoChain:
 
     def get(self):
         return self._table.get_item(**ChainsConditionBuilder(self._query).query)["Item"]
+
