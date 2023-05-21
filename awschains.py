@@ -93,7 +93,7 @@ class DynamoChain:
         return resp
 
     def scan(self):
-        resp = self._table.scan(**self._query)
+        resp = self._table.scan(**ChainsConditionBuilder(self._query).query)
         self._check_next_query(resp)
         return resp["Items"]
 

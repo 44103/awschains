@@ -60,7 +60,25 @@ class TestWrapper:
         # 処理実行
         actual = db.scan()
         # 結果確認
-        expected = data.read_json("data/expected_scan", float_as=Decimal)
+        expected = data.read_json("data/expected_scan1", float_as=Decimal)
+        assert expected == actual
+
+    def test_case_scan2(self):
+        """Scan2"""
+
+        # Module初期化
+        data, table = self.init
+        db = DynamoChain(table)
+        # 処理実行
+        actual = (
+            db
+            .filter(Attr("LastPostedBy").eq("User A"))
+            .and_.filter(Attr("Views").eq(1))
+            .projection("ForumName, Subject, Message")
+            .scan()
+        )
+        # 結果確認
+        expected = data.read_json("data/expected_scan2", float_as=Decimal)
         assert expected == actual
 
     def test_case_query1(self):
