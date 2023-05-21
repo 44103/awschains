@@ -1,5 +1,5 @@
 import operator
-
+from conditions import ChainsConditionBuilder
 
 class DynamoChain:
     def __init__(self, table) -> None:
@@ -97,7 +97,7 @@ class DynamoChain:
         return resp
 
     def query(self):
-        resp = self._table.query(**self._query)
+        resp = self._table.query(**ChainsConditionBuilder(self._query).query)
         self._check_next_query(resp)
         return resp["Items"]
 
