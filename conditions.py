@@ -6,6 +6,8 @@ class ChainsConditionBuilder(ConditionExpressionBuilder):
         super().__init__()
         self._query = query
         self._pe_list = []
+        self._query["ExpressionAttributeNames"] = {}
+        self._query["ExpressionAttributeValues"] = {}
 
     def _build_key_condition_expression(self):
         if "KeyConditionExpression" not in self._query:
@@ -47,8 +49,6 @@ class ChainsConditionBuilder(ConditionExpressionBuilder):
 
     @property
     def query(self):
-        self._query["ExpressionAttributeNames"] = {}
-        self._query["ExpressionAttributeValues"] = {}
         self._build_key_condition_expression()
         self._build_filter_expression()
         self._build_projection_expression()
