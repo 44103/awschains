@@ -11,7 +11,8 @@
 		"patbenatar.advanced-new-file",
 		"sleistner.vscode-fileutils",
 		"mhutchie.git-graph",
-		"ms-python.python"
+		"ms-python.python",
+		"esbenp.prettier-vscode"
 	],
 	"service": "python",
 	"workspaceFolder": "/workdir",
