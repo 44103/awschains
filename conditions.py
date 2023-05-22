@@ -5,7 +5,6 @@ class ChainsConditionBuilder(ConditionExpressionBuilder):
     def __init__(self, query):
         super().__init__()
         self._query = query
-        self._pe_list = []
 
     def _build_key_condition_expression(self):
         self._build_expression_to_query("KeyConditionExpression", is_key_condition=True)
@@ -27,21 +26,21 @@ class ChainsConditionBuilder(ConditionExpressionBuilder):
         if type(self._query["ProjectionExpression"]) is not str:
             raise TypeError("ProjectionExpression should have str specified.")
         self._add_attr_names_from_pe()
-        self._use_attr_names_for_pe()
+        self._build_pe_from_attr_names()
 
     def _add_attr_names_from_pe(self):
-        self._query["ProjectionExpression"].replace(" ", "")
-        self._pe_list = self._query["ProjectionExpression"].split(",")
-        for pe in self._pe_list:
+        pe_list = [key.strip() for key in self._query["ProjectionExpression"].split(",")]
+        for pe in pe_list:
             if pe not in self.expression_attribute_names.values():
                 bce = self.build_expression(Attr(pe).eq("dummy"))
                 self.expression_attribute_names |= bce.attribute_name_placeholders
 
-    def _use_attr_names_for_pe(self):
+    def _build_pe_from_attr_names(self):
         reversed_attr_names = {v: k for k, v in self.expression_attribute_names.items()}
-        for i, pe in enumerate(self._pe_list):
-            self._pe_list[i] = reversed_attr_names[pe]
-        self._query["ProjectionExpression"] = ",".join(self._pe_list)
+        pe_list = [key.strip() for key in self._query["ProjectionExpression"].split(",")]
+        self._query["ProjectionExpression"] = ",".join(
+            [reversed_attr_names[pe] for pe in pe_list]
+        )
 
     @property
     def expression_attribute_names(self):
