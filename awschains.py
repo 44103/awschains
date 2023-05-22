@@ -78,6 +78,15 @@ class DynamoChain:
             self._query["ProjectionExpression"] = pe
         return self
 
+    def condition(self, ce):
+        if "ConditionExpression" in self._query:
+            self._query["ConditionExpression"] = self._operator(
+                self._query["ConditionExpression"], ce
+            )
+        else:
+            self._query["ConditionExpression"] = ce
+        return self
+
     # Last Method
     def count(self):
         self._query["Select"] = "COUNT"
@@ -120,3 +129,6 @@ class DynamoChain:
     def get(self):
         return self._table.get_item(**ChainsConditionBuilder(self._query).query)["Item"]
 
+    def put(self, item):
+        self._query["Item"] = item
+        self._table.put_item(**ChainsConditionBuilder(self._query).query)
