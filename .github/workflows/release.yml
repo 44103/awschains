@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - "main"
+
+  pull_request:
+    branches:
+      - "main"
+
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build Environment
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run test
+        working-directory: ./test
+        run: |
+          pip install pytest-html pytest-cov
+          pytest --cov=. --cov-report=html
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build module
+        run: |
+          pip install wheel
+          python setup.py sdist --formats=zip
+
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
