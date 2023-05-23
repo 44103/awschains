@@ -39,8 +39,8 @@ def init_modules(request: Type[FixtureRequest], monkeypatch: MonkeyPatch):
 class TestWrapper:
     """DynamoDB Wrapper"""
 
-    def test_case0(self):
-        """Count"""
+    def test_case_count1(self):
+        """Count1"""
 
         # Module初期化
         _, table = self.init
@@ -51,8 +51,24 @@ class TestWrapper:
         expected = 4
         assert expected == actual
 
-    def test_case1(self):
-        """Scan"""
+    def test_case_count2(self):
+        """Count2"""
+
+        # Module初期化
+        _, table = self.init
+        db = DynamoChain(table)
+        # 処理実行
+        actual = (
+            db.filter(Attr("LastPostedBy").eq("User A"))
+            .and_.filter(Attr("Views").eq(1))
+            .count_all()
+        )
+        # 結果確認
+        expected = 1
+        assert expected == actual
+
+    def test_case_scan1(self):
+        """Scan1"""
 
         # Module初期化
         data, table = self.init
@@ -60,10 +76,27 @@ class TestWrapper:
         # 処理実行
         actual = db.scan()
         # 結果確認
-        expected = data.read_json("data/expected_scan", float_as=Decimal)
+        expected = data.read_json("data/expected_scan1", float_as=Decimal)
         assert expected == actual
 
-    def test_case2(self):
+    def test_case_scan2(self):
+        """Scan2"""
+
+        # Module初期化
+        data, table = self.init
+        db = DynamoChain(table)
+        # 処理実行
+        actual = (
+            db.filter(Attr("LastPostedBy").eq("User A"))
+            .and_.filter(Attr("Views").eq(1))
+            .projection("ForumName, Subject, Message")
+            .scan()
+        )
+        # 結果確認
+        expected = data.read_json("data/expected_scan2", float_as=Decimal)
+        assert expected == actual
+
+    def test_case_query1(self):
         """Query1"""
 
         # Module初期化
@@ -84,7 +117,7 @@ class TestWrapper:
         expected = data.read_json("data/expected_query1", float_as=Decimal)
         assert expected == actual
 
-    def test_case3(self):
+    def test_case_query2(self):
         """Query2"""
 
         # Module初期化
@@ -95,6 +128,8 @@ class TestWrapper:
             .key_condition(Key("Subject").gte("S3 Thread 2"))
             .filter(Attr("LastPostedBy").eq("User A"))
             .and_.filter(Attr("Views").eq(1))
+            .projection("ForumName, Subject, Message")
+            .projection("LastPostedBy, LastPostedDateTime,Views")
             .desc()
             .query_all()
         )
@@ -102,8 +137,8 @@ class TestWrapper:
         expected = data.read_json("data/expected_query2", float_as=Decimal)
         assert expected == actual
 
-    def test_case4(self):
-        """Delete"""
+    def test_case_delete1(self):
+        """Delete1"""
 
         # Module初期化
         data, table = self.init

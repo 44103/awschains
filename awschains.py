@@ -1,5 +1,5 @@
 import operator
-
+from conditions import ChainsConditionBuilder
 
 class DynamoChain:
     def __init__(self, table) -> None:
@@ -71,10 +71,17 @@ class DynamoChain:
         self._query["ConsistentRead"] = cr
         return self
 
+    def projection(self, pe):
+        if "ProjectionExpression" in self._query:
+            self._query["ProjectionExpression"] += ',' + pe
+        else:
+            self._query["ProjectionExpression"] = pe
+        return self
+
     # Last Method
     def count(self):
         self._query["Select"] = "COUNT"
-        resp = self._table.scan(**self._query)
+        resp = self._table.scan(**ChainsConditionBuilder(self._query).query)
         self._check_next_query(resp)
         count = resp["Count"]
         return count
@@ -86,7 +93,7 @@ class DynamoChain:
         return resp
 
     def scan(self):
-        resp = self._table.scan(**self._query)
+        resp = self._table.scan(**ChainsConditionBuilder(self._query).query)
         self._check_next_query(resp)
         return resp["Items"]
 
@@ -97,7 +104,7 @@ class DynamoChain:
         return resp
 
     def query(self):
-        resp = self._table.query(**self._query)
+        resp = self._table.query(**ChainsConditionBuilder(self._query).query)
         self._check_next_query(resp)
         return resp["Items"]
 
@@ -108,7 +115,7 @@ class DynamoChain:
         return resp
 
     def delete(self):
-        self._table.delete_item(**self._query)
+        self._table.delete_item(**ChainsConditionBuilder(self._query).query)
 
     def get(self):
-        return self._table.get_item(**self._query)["Item"]
+        return self._table.get_item(**ChainsConditionBuilder(self._query).query)["Item"]
