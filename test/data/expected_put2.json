@@ -1,0 +1,60 @@
+[
+  {
+    "ForumName": "Amazon DynamoDB",
+    "Subject": "DynamoDB Thread 1",
+    "Message": "DynamoDB thread 1 message",
+    "LastPostedBy": "User A",
+    "LastPostedDateTime": "2015-09-22T19:58:22.514Z",
+    "Views": 0,
+    "Replies": 0,
+    "Answered": 0,
+    "Tags": [
+      "index",
+      "primarykey",
+      "table"
+    ]
+  },
+  {
+    "ForumName": "Amazon DynamoDB",
+    "Subject": "DynamoDB Thread 2",
+    "Message": "DynamoDB thread 2 message",
+    "LastPostedBy": "User A",
+    "LastPostedDateTime": "2015-09-15T19:58:22.514Z",
+    "Views": 0,
+    "Replies": 0,
+    "Answered": 0,
+    "Tags": [
+      "items",
+      "attributes",
+      "throughput"
+    ]
+  },
+  {
+    "ForumName": "Amazon S3",
+    "Subject": "S3 Thread 1",
+    "Message": "S3 thread 1 message",
+    "LastPostedBy": "User A",
+    "LastPostedDateTime": "2015-09-29T19:58:22.514Z",
+    "Views": 0,
+    "Replies": 0,
+    "Answered": 0,
+    "Tags": [
+      "largeobjects",
+      "multipart upload"
+    ]
+  },
+  {
+    "ForumName": "Amazon S3",
+    "Subject": "S3 Thread 2",
+    "Message": "S3 thread 2 message",
+    "LastPostedBy": "User A",
+    "LastPostedDateTime": "2015-09-29T19:58:22.514Z",
+    "Views": 2,
+    "Replies": 0,
+    "Answered": 0,
+    "Tags": [
+      "largeobjects",
+      "multipart upload"
+    ]
+  }
+]

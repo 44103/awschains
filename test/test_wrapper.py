@@ -2,7 +2,8 @@ from decimal import Decimal
 from typing import Type
 from moto import mock_dynamodb
 from boto3.dynamodb.conditions import Key, Attr
-from pytest import FixtureRequest, MonkeyPatch, fixture
+from botocore.exceptions import ClientError
+from pytest import FixtureRequest, MonkeyPatch, fixture, raises
 import sys
 
 sys.path.append("../")
@@ -148,7 +149,7 @@ class TestWrapper:
         # 結果確認
         db.clear()
         actual = db.scan()
-        expected = data.read_json("data/expected_delete", float_as=Decimal)
+        expected = data.read_json("data/expected_delete1", float_as=Decimal)
         assert expected == actual
 
     def test_case5(self):
@@ -166,3 +167,95 @@ class TestWrapper:
         # 結果確認
         expected = data.read_json("data/expected_get", float_as=Decimal)
         assert expected == actual
+
+    def test_case_put1(self):
+        """Put1"""
+        """Create a new item"""
+
+        # Module初期化
+        data, table = self.init
+        db = DynamoChain(table)
+        # 処理実行
+
+        item = {
+            "ForumName": "Amazon S3",
+            "Subject": "S3 Thread 3",
+            "Message": "S3 thread 3 message",
+            "LastPostedBy": "User A",
+            "LastPostedDateTime": "2015-09-29T19:58:22.514Z",
+            "Views": 2,
+            "Replies": 0,
+            "Answered": 0,
+            "Tags": [
+            "largeobjects",
+            "multipart upload"
+            ]
+        }
+        db.put(item)
+        # 結果確認
+        db.clear()
+        actual = db.scan()
+        expected = data.read_json("data/expected_put1", float_as=Decimal)
+        assert expected == actual
+
+    def test_case_put2(self):
+        """Put2"""
+        """Update existing items"""
+
+        # Module初期化
+        data, table = self.init
+        db = DynamoChain(table)
+        # 処理実行
+        item = {
+            "ForumName": "Amazon S3",
+            "Subject": "S3 Thread 2",
+            "Message": "S3 thread 2 message",
+            "LastPostedBy": "User A",
+            "LastPostedDateTime": "2015-09-29T19:58:22.514Z",
+            "Views": 2,
+            "Replies": 0,
+            "Answered": 0,
+            "Tags": [
+            "largeobjects",
+            "multipart upload"
+            ]
+        }
+        db.condition(Key("ForumName").eq("Amazon S3"))\
+        .condition(Key("Subject").eq("S3 Thread 2"))\
+        .put(item)
+        # 結果確認
+        db.clear()
+        actual = db.scan()
+        expected = data.read_json("data/expected_put2", float_as=Decimal)
+        assert expected == actual
+
+    def test_case_put3(self):
+        """Put3"""
+        """Non-existent item is not updated."""
+
+        # Module初期化
+        data, table = self.init
+        db = DynamoChain(table)
+        # 処理実行
+        item = {
+            "ForumName": "Amazon S3",
+            "Subject": "S3 Thread 3",
+            "Message": "S3 thread 3 message",
+            "LastPostedBy": "User A",
+            "LastPostedDateTime": "2015-09-29T19:58:22.514Z",
+            "Views": 2,
+            "Replies": 0,
+            "Answered": 0,
+            "Tags": [
+            "largeobjects",
+            "multipart upload"
+            ]
+        }
+        with raises(ClientError) as e:
+            db.condition(Key("ForumName").eq("Amazon S3"))\
+            .condition(Key("Subject").eq("S3 Thread 3"))\
+            .put(item)
+        # 結果確認
+        actual =  e.typename
+        expected = "ConditionalCheckFailedException"
+        assert actual == expected
