@@ -12,7 +12,9 @@
 		"sleistner.vscode-fileutils",
 		"mhutchie.git-graph",
 		"ms-python.python",
-		"esbenp.prettier-vscode"
+		"esbenp.prettier-vscode",
+		"eamodio.gitlens",
+		"bungcip.better-toml"
 	],
 	"service": "python",
 	"workspaceFolder": "/workdir",
