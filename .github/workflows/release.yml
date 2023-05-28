@@ -14,20 +14,12 @@ jobs:
     steps:
       - name: Checkout main branch
         uses: actions/checkout@v3
-        with:
-          ref: main
-          # fetch-depth: 0
+        # with:
+        #   ref: main
+        #   fetch-depth: 0
 
       - name: Check tagged branch
-        run: |
-          BRANCHES=$(git branch --contains ${{ github.ref_name }})
-          set -- $BRANCHES
-          for BRANCH in $BRANCHES; do
-            if [[ "$BRANCH" == "main" ]]; then
-              exit 0
-            fi
-          done
-          exit 1
+        run: ./.github/workflows/guard_branch.sh
 
       - name: Build module
         run: |
