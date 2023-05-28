@@ -12,7 +12,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout main branch
+        uses: actions/checkout@v3
+        with:
+          ref: main
+          # fetch-depth: 0
+
+      - name: Check tagged branch
+        run: |
+          BRANCHES=$(git branch --contains ${{ github.ref_name }})
+          set -- $BRANCHES
+          for BRANCH in $BRANCHES; do
+            if [[ "$BRANCH" == "main" ]]; then
+              exit 0
+            fi
+          done
+          exit 1
 
       - name: Build module
         run: |
