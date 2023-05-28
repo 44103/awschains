@@ -161,3 +161,4 @@ cython_debug/
 
 # PyPI
 .pypirc
+_version.py
