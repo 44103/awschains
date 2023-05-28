@@ -1,4 +1,4 @@
-name: Develop
+name: Test
 
 on:
   push:
@@ -28,20 +28,3 @@ jobs:
         run: |
           pip install pytest-html pytest-cov
           pytest --cov=. --cov-report=html
-
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Build module
-        run: |
-          pip install wheel
-          python setup.py sdist --formats=zip
-
-      - name: Publish package distributions to TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-          repository-url: https://test.pypi.org/legacy/

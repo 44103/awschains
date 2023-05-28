@@ -7,7 +7,7 @@ import sys
 
 sys.path.append("../")
 
-from awschains import DynamoChain
+from src.awschains.dynamochain import DynamoChain
 
 
 @fixture(autouse=True)
