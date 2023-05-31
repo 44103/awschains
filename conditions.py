@@ -1,8 +1,59 @@
 from boto3.dynamodb.conditions import ConditionExpressionBuilder, Attr
 
+class ChainsCondition:
+
+    def __init__(self):
+        self._key = None
+        self._projection_exp = None
+        self._key_condition_exp = None
+        self._filter_exp = None
+        self._scan_index_forward = None
+        self._consistent_read = None
+
+    @property
+    def key(self):
+        return self._key
+
+    @key.setter
+    def key(self, value):
+        if self._key is not None:
+            self._key |= value
+        else:
+            self._key = value
+
+    def key_condition_exp(self, value):
+        if self._key_condition_exp is not None:
+            self._key_condition_exp &= value
+        else:
+            self._key_condition_exp = value
+
+    def projection_exp(self, value):
+        if self._projection_exp is not None:
+            self._projection_exp += ',' + value
+        else:
+            self._projection_exp = value
+
+    def asc(self):
+        self._scan_index_forward = True
+
+    def desc(self):
+        self._scan_index_forward = False
+
+    def limit(self, num: int):
+        self._limit = num
+
+    def condition_exp(self, ce):
+        self._condition_exp = ce
+
+    def filter_exp(self, fe):
+        self._filter_exp = fe
+
+    def consistent_read(self, cr):
+        self._consistent_read = cr
+
 class ChainsConditionBuilder(ConditionExpressionBuilder):
 
-    def __init__(self, query):
+    def __init__(self, query:ChainsCondition):
         super().__init__()
         self._query = query
 
@@ -71,12 +122,9 @@ class ChainsConditionBuilder(ConditionExpressionBuilder):
             self._query["ExpressionAttributeValues"] |= value
 
     @property
-    def query(self):
+    def boto3_query(self):
+        # ここでboto3用のqueryを生成して
         self._build_key_condition_expression()
         self._build_filter_expression()
         self._build_projection_expression()
-        return self._query
-
-    @query.setter
-    def query(self, value):
-        self._query = value
+        return self._boto3_query
