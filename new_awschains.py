@@ -1,83 +1,119 @@
 from abc import ABCMeta, abstractmethod
-from conditions import ChainsCondition
+from itertools import chain
+from conditions import ChainsConditionBuilder
+
 
 class AccessorBase(metaclass=ABCMeta):
     def __init__(self, table) -> None:
-        self.table = table
-        self.condition = ChainsCondition()
+        self._table = table
+        self._return_consumed_capacity = "NONE"
 
-    @abstractmethod
-    def return_consumed_capacity(self):
-        print("return_consumed_capacity")
+    def return_consumed_capacity(self, value: str):
+        self._return_consumed_capacity = value
+        return self
 
     @abstractmethod
     def run(self):
-        print("run")
+        pass
+
 
 class ReadBase(AccessorBase):
-    @abstractmethod
+    def __init__(self, table) -> None:
+        super().__init__(table)
+        self._key_condition_exp = None
+        self._projection_exps = []
+        self._consistent_read = False
+
+    def key_condition_exp(self, value):
+        if self._key_condition_exp:
+            self._key_condition_exp &= value
+        else:
+            self._key_condition_exp = value
+        return self
+
     def projection_exp(self, pe: str):
-        print("projection_exp")
-        self.condition.projection_exp(pe)
+        self._projection_exps.extend([x.strip() for x in pe.split(",")])
+        return self
+
+    def consistent_read(self, cr: bool = True):
+        self._consistent_read = cr
+        return self
 
     @abstractmethod
-    def consistent_read(self, cr: bool = True):
-        print("consistent_read")
-        self.condition.consistent_read(cr)
+    def run(self):
+        pass
+
 
 class WriteBase(AccessorBase):
-    @abstractmethod
+    def __init__(self, table) -> None:
+        super().__init__(table)
+        self._condition_exp = ""
+
     def condition_exp(self, ce: str):
-        print("condition_exp")
-        self.condition.condition_exp(ce)
+        self._condition_exp(ce)
+        return self
+
+    @abstractmethod
+    def run(self):
+        pass
+
 
 class MultiReadBase(ReadBase):
-    @abstractmethod
+    def __init__(self, table) -> None:
+        super().__init__(table)
+        self._filter_exp = ""
+        self._limit = None
+        self._exclusive_start_key = None
+
     def asc(self):
-        print("asc")
-        self.condition.asc()
+        self._scan_index_forward = True
+        return self
 
-    @abstractmethod
     def desc(self):
-        print("desc")
-        self.condition.desc()
+        self._scan_index_forward = False
+        return self
 
-    @abstractmethod
-    def limit(self, num):
-        print("limit")
-        self.condition.limit(num)
+    def limit(self, value: int):
+        self._limit = value
+        return self
 
-    @abstractmethod
     def filter_exp(self, fe):
-        print("fileter_exp")
-        self.condition.filter_exp(fe)
+        if self._filter_exp:
+            self._filter_exp &= fe
+        else:
+            self._filter_exp = fe
+        return self
 
-class GetItem(ReadBase):
+    def _create_requests(self):
+        requests = {}
+        if self._key_condition_exp:
+            requests["KeyConditionExpression"] = self._key_condition_exp
+        if self._projection_exps:
+            requests["ProjectionExpression"] = ",".join(self._projection_exps)
+        requests["ConsistentRead"] = self._consistent_read
+        if self._filter_exp:
+            requests["FilterExpression"] = self._filter_exp
+        if self._limit:
+            requests["Limit"] = self._limit
+        if self._exclusive_start_key:
+            requests["ExclusiveStartKey"] = self._exclusive_start_key
+        return requests
+
+    def run(self):
+        return list(chain(*[record["Items"] for record in self.iter()]))
+
+    @abstractmethod
+    def iter(self):
+        pass
+
+
+class Scan(MultiReadBase):
     def __init__(self, table) -> None:
         super().__init__(table)
 
-    def projection_exp(self, pe: str):
-        super().projection_exp(pe)
-        return self
-
-    def consistent_read(self, cr: bool = True):
-        super().consistent_read(cr)
-        return self
-
-    def return_consumed_capacity(self):
-        super().return_consumed_capacity()
-        return self
-
-    def run(self):
-        super().run()
-        print(self.condition._projection_exp)
-
-get_item = GetItem("table")
-(
-    get_item
-    .consistent_read()
-    .projection_exp("pe")
-    .projection_exp("aaa,bbb,ccc")
-    .return_consumed_capacity()
-    .run()
-)
+    def iter(self):
+        requests = self._create_requests()
+        response = self._table.scan(**ChainsConditionBuilder(requests).boto3_query)
+        if "LastEvaluetedKey" in response:
+            self._exclusive_start_key = response["LastEvaluetedKey"]
+        yield response

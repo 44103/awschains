@@ -9,6 +9,7 @@ import sys
 sys.path.append("../")
 
 from awschains import DynamoChain
+from new_awschains import Scan
 
 
 @fixture(autouse=True)
@@ -40,7 +41,7 @@ def init_modules(request: Type[FixtureRequest], monkeypatch: MonkeyPatch):
 class TestWrapper:
     """DynamoDB Wrapper"""
 
-    @mark.skip(reason="Deprecate")
+    @mark.skip(reason="Recreate")
     def test_case_count1(self):
         """Count1"""
 
@@ -53,7 +54,7 @@ class TestWrapper:
         expected = 4
         assert expected == actual
 
-    @mark.skip(reason="Deprecate")
+    @mark.skip(reason="Recreate")
     def test_case_count2(self):
         """Count2"""
 
@@ -70,38 +71,38 @@ class TestWrapper:
         expected = 1
         assert expected == actual
 
-    @mark.skip(reason="Deprecate")
-    def test_case_scan1(self):
-        """Scan1"""
+    class TestScan:
+        """Scan"""
 
-        # Module初期化
-        data, table = self.init
-        db = DynamoChain(table)
-        # 処理実行
-        actual = db.scan()
-        # 結果確認
-        expected = data.read_json("data/expected_scan1", float_as=Decimal)
-        assert expected == actual
+        def test_case_1(self):
+            """All items"""
 
-    @mark.skip(reason="Deprecate")
-    def test_case_scan2(self):
-        """Scan2"""
+            # Module初期化
+            data, table = self.init
+            # 処理実行
+            actual = Scan(table).run()
+            # 結果確認
+            expected = data.read_json("data/expected_scan1", float_as=Decimal)
+            assert expected == actual
 
-        # Module初期化
-        data, table = self.init
-        db = DynamoChain(table)
-        # 処理実行
-        actual = (
-            db.filter(Attr("LastPostedBy").eq("User A"))
-            .and_.filter(Attr("Views").eq(1))
-            .projection("ForumName, Subject, Message")
-            .scan()
-        )
-        # 結果確認
-        expected = data.read_json("data/expected_scan2", float_as=Decimal)
-        assert expected == actual
+        def test_case_2(self):
+            """Use filter and projection"""
 
-    @mark.skip(reason="Deprecate")
+            # Module初期化
+            data, table = self.init
+            # 処理実行
+            actual = (
+                Scan(table)
+                .filter_exp(Attr("LastPostedBy").eq("User A"))
+                .filter_exp(Attr("Views").eq(1))
+                .projection_exp("ForumName, Subject, Message")
+                .run()
+            )
+            # 結果確認
+            expected = data.read_json("data/expected_scan2", float_as=Decimal)
+            assert expected == actual
+
+    @mark.skip(reason="Recreate")
     def test_case_query1(self):
         """Query1"""
 
@@ -123,7 +124,7 @@ class TestWrapper:
         expected = data.read_json("data/expected_query1", float_as=Decimal)
         assert expected == actual
 
-    @mark.skip(reason="Deprecate")
+    @mark.skip(reason="Recreate")
     def test_case_query2(self):
         """Query2"""
 
@@ -144,7 +145,7 @@ class TestWrapper:
         expected = data.read_json("data/expected_query2", float_as=Decimal)
         assert expected == actual
 
-    @mark.skip(reason="Deprecate")
+    @mark.skip(reason="Recreate")
     def test_case_delete1(self):
         """Delete1"""
 
@@ -159,7 +160,7 @@ class TestWrapper:
         expected = data.read_json("data/expected_delete1", float_as=Decimal)
         assert expected == actual
 
-    @mark.skip(reason="Deprecate")
+    @mark.skip(reason="Recreate")
     def test_case5(self):
         """Get"""
 
@@ -176,7 +177,7 @@ class TestWrapper:
         expected = data.read_json("data/expected_get", float_as=Decimal)
         assert expected == actual
 
-    @mark.skip(reason="Deprecate")
+    @mark.skip(reason="Recreate")
     def test_case_put1(self):
         """Put1"""
         """Create a new item"""
@@ -204,7 +205,7 @@ class TestWrapper:
         expected = data.read_json("data/expected_put1", float_as=Decimal)
         assert expected == actual
 
-    @mark.skip(reason="Deprecate")
+    @mark.skip(reason="Recreate")
     def test_case_put2(self):
         """Put2"""
         """Update existing items"""
@@ -233,7 +234,7 @@ class TestWrapper:
         expected = data.read_json("data/expected_put2", float_as=Decimal)
         assert expected == actual
 
-    @mark.skip(reason="Deprecate")
+    @mark.skip(reason="Recreate")
     def test_case_put3(self):
         """Put3"""
         """Non-existent item is not updated."""
