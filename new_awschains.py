@@ -117,3 +117,21 @@ class Scan(MultiReadBase):
         if "LastEvaluetedKey" in response:
             self._exclusive_start_key = response["LastEvaluetedKey"]
         yield response
+
+
+class Query(MultiReadBase):
+    def __init__(self, table) -> None:
+        super().__init__(table)
+        self._scan_index_forward = True
+
+    def _create_requests(self):
+        requests = super()._create_requests()
+        requests["ScanIndexForward"] = self._scan_index_forward
+        return requests
+
+    def iter(self):
+        requests = self._create_requests()
+        response = self._table.query(**ChainsConditionBuilder(requests).boto3_query)
+        if "LastEvaluetedKey" in response:
+            self._exclusive_start_key = response["LastEvaluetedKey"]
+        yield response

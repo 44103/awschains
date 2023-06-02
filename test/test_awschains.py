@@ -9,23 +9,23 @@ import sys
 sys.path.append("../")
 
 from awschains import DynamoChain
-from new_awschains import Scan
+from new_awschains import Query, Scan
 
 
 @fixture(autouse=True)
 def init_modules(request: Type[FixtureRequest], monkeypatch: MonkeyPatch):
-    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "dummy")
-    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "dummy")
+    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "_")
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "_")
     monkeypatch.setenv("AWS_DEFAULT_REGION", "ap-northeast-1")
     monkeypatch.setenv("SAMPLE_TABLE", "sample_table")
 
     import data
 
-    # Mock定義
+    # Define mocks
     mock = mock_dynamodb()
     mock.start()
     table = data.setup_dynamodb_table()
-    # DB初期化
+    # Init DB
     [
         table.put_item(Item=d)
         for d in data.read_json("database/database", float_as=Decimal)
@@ -45,12 +45,12 @@ class TestWrapper:
     def test_case_count1(self):
         """Count1"""
 
-        # Module初期化
+        # Init modules
         _, table = self.init
         db = DynamoChain(table)
-        # 処理実行
+        # Execute
         actual = db.count()
-        # 結果確認
+        # Confirm
         expected = 4
         assert expected == actual
 
@@ -58,16 +58,16 @@ class TestWrapper:
     def test_case_count2(self):
         """Count2"""
 
-        # Module初期化
+        # Init modules
         _, table = self.init
         db = DynamoChain(table)
-        # 処理実行
+        # Execute
         actual = (
             db.filter(Attr("LastPostedBy").eq("User A"))
             .and_.filter(Attr("Views").eq(1))
             .count_all()
         )
-        # 結果確認
+        # Confirm
         expected = 1
         assert expected == actual
 
@@ -77,20 +77,20 @@ class TestWrapper:
         def test_case_1(self):
             """All items"""
 
-            # Module初期化
+            # Init modules
             data, table = self.init
-            # 処理実行
+            # Execute
             actual = Scan(table).run()
-            # 結果確認
+            # Confirm
             expected = data.read_json("data/expected_scan1", float_as=Decimal)
             assert expected == actual
 
         def test_case_2(self):
             """Use filter and projection"""
 
-            # Module初期化
+            # Init modules
             data, table = self.init
-            # 処理実行
+            # Execute
             actual = (
                 Scan(table)
                 .filter_exp(Attr("LastPostedBy").eq("User A"))
@@ -98,63 +98,64 @@ class TestWrapper:
                 .projection_exp("ForumName, Subject, Message")
                 .run()
             )
-            # 結果確認
+            # Confirm
             expected = data.read_json("data/expected_scan2", float_as=Decimal)
             assert expected == actual
 
-    @mark.skip(reason="Recreate")
-    def test_case_query1(self):
-        """Query1"""
+    class TestQuery:
+        """Query"""
 
-        # Module初期化
-        data, table = self.init
-        db = DynamoChain(table)
-        # 処理実行
-        actual = (
-            db.key_condition(Key("ForumName").eq("Amazon DynamoDB"))
-            .key_condition(Key("Subject").gte("DynamoDB Thread 1"))
-            .filter(Attr("LastPostedBy").eq("User A"))
-            .or_.filter(Attr("Views").eq(0))
-            .limit(2)
-            .desc()
-            .consistent_read()
-            .query_all()
-        )
-        # 結果確認
-        expected = data.read_json("data/expected_query1", float_as=Decimal)
-        assert expected == actual
+        def test_case_1(self):
+            """'OR' filter expression"""
 
-    @mark.skip(reason="Recreate")
-    def test_case_query2(self):
-        """Query2"""
+            # Init modules
+            data, table = self.init
+            # Execute
+            actual = (
+                Query(table)
+                .key_condition_exp(Key("ForumName").eq("Amazon DynamoDB"))
+                .key_condition_exp(Key("Subject").gte("DynamoDB Thread 1"))
+                .filter_exp(Attr("LastPostedBy").eq("User A") | Attr("Views").eq(0))
+                .limit(2)
+                .desc()
+                .consistent_read()
+                .run()
+            )
+            # Confirm
+            expected = data.read_json("data/expected_query1", float_as=Decimal)
+            assert expected == actual
 
-        # Module初期化
-        data, table = self.init
-        db = DynamoChain(table)
-        actual = (
-            db.key_condition(Key("ForumName").eq("Amazon S3"))
-            .key_condition(Key("Subject").gte("S3 Thread 2"))
-            .filter(Attr("LastPostedBy").eq("User A"))
-            .and_.filter(Attr("Views").eq(1))
-            .projection("ForumName, Subject, Message")
-            .projection("LastPostedBy, LastPostedDateTime,Views")
-            .desc()
-            .query_all()
-        )
-        # 結果確認
-        expected = data.read_json("data/expected_query2", float_as=Decimal)
-        assert expected == actual
+        def test_case_2(self):
+            """'AND' filter expression"""
+
+            # Init modules
+            data, table = self.init
+            # Execute
+            actual = (
+                Query(table)
+                .key_condition_exp(Key("ForumName").eq("Amazon S3"))
+                .key_condition_exp(Key("Subject").gte("S3 Thread 2"))
+                .filter_exp(Attr("LastPostedBy").eq("User A"))
+                .filter_exp(Attr("Views").eq(1))
+                .projection_exp("ForumName, Subject, Message")
+                .projection_exp("LastPostedBy, LastPostedDateTime, Views")
+                .desc()
+                .run()
+            )
+            # Confirm
+            expected = data.read_json("data/expected_query2", float_as=Decimal)
+            assert expected == actual
 
     @mark.skip(reason="Recreate")
     def test_case_delete1(self):
         """Delete1"""
 
-        # Module初期化
+        # Init modules
         data, table = self.init
         db = DynamoChain(table)
-        # 処理実行
+        # Execute
         db.key("ForumName", "Amazon S3").key("Subject", "S3 Thread 1").delete()
-        # 結果確認
+        # Confirm
         db.clear()
         actual = db.scan()
         expected = data.read_json("data/expected_delete1", float_as=Decimal)
@@ -164,16 +165,16 @@ class TestWrapper:
     def test_case5(self):
         """Get"""
 
-        # Module初期化
+        # Init modules
         data, table = self.init
         db = DynamoChain(table)
-        # 処理実行
+        # Execute
         actual = (
             db.key("ForumName", "Amazon DynamoDB")
             .key("Subject", "DynamoDB Thread 1")
             .get()
         )
-        # 結果確認
+        # Confirm
         expected = data.read_json("data/expected_get", float_as=Decimal)
         assert expected == actual
 
@@ -182,10 +183,10 @@ class TestWrapper:
         """Put1"""
         """Create a new item"""
 
-        # Module初期化
+        # Init modules
         data, table = self.init
         db = DynamoChain(table)
-        # 処理実行
+        # Execute
 
         item = {
             "ForumName": "Amazon S3",
@@ -199,7 +200,7 @@ class TestWrapper:
             "Tags": ["largeobjects", "multipart upload"],
         }
         db.put(item)
-        # 結果確認
+        # Confirm
         db.clear()
         actual = db.scan()
         expected = data.read_json("data/expected_put1", float_as=Decimal)
@@ -210,10 +211,10 @@ class TestWrapper:
         """Put2"""
         """Update existing items"""
 
-        # Module初期化
+        # Init modules
         data, table = self.init
         db = DynamoChain(table)
-        # 処理実行
+        # Execute
         item = {
             "ForumName": "Amazon S3",
             "Subject": "S3 Thread 2",
@@ -228,7 +229,7 @@ class TestWrapper:
         db.condition(Key("ForumName").eq("Amazon S3")).condition(
             Key("Subject").eq("S3 Thread 2")
         ).put(item)
-        # 結果確認
+        # Confirm
         db.clear()
         actual = db.scan()
         expected = data.read_json("data/expected_put2", float_as=Decimal)
@@ -239,10 +240,10 @@ class TestWrapper:
         """Put3"""
         """Non-existent item is not updated."""
 
-        # Module初期化
+        # Init modules
         data, table = self.init
         db = DynamoChain(table)
-        # 処理実行
+        # Execute
         item = {
             "ForumName": "Amazon S3",
             "Subject": "S3 Thread 3",
@@ -258,7 +259,7 @@ class TestWrapper:
             db.condition(Key("ForumName").eq("Amazon S3")).condition(
                 Key("Subject").eq("S3 Thread 3")
             ).put(item)
-        # 結果確認
+        # Confirm
         actual = e.typename
         expected = "ConditionalCheckFailedException"
         assert actual == expected
