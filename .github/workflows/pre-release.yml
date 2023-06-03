@@ -5,6 +5,8 @@ on:
     workflows: ["Test"]
     types:
       - completed
+  push:
+    branches: ["main"]
 
 jobs:
   deploy:
