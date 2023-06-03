@@ -12,14 +12,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout main branch
-        uses: actions/checkout@v3
-        with:
-          ref: main
-          fetch-depth: 0
+      - uses: actions/checkout@v3
 
       - name: Check tagged branch
-        run: ./.github/workflows/guard_branch.sh
+        working-directory: ./.github/workflows
+        run: guard_branch.sh production
 
       - name: Build module
         run: |
