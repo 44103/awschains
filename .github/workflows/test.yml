@@ -24,7 +24,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run test
-        working-directory: ./test
+        working-directory: ./tests
         run: |
           pip install pytest-html pytest-cov
           pytest --cov=. --cov-report=html
