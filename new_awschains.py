@@ -65,14 +65,6 @@ class MultiReadBase(ReadBase):
         self._limit = None
         self._exclusive_start_key = None
 
-    def asc(self):
-        self._scan_index_forward = True
-        return self
-
-    def desc(self):
-        self._scan_index_forward = False
-        return self
-
     def limit(self, value: int):
         self._limit = value
         return self
@@ -123,6 +115,14 @@ class Query(MultiReadBase):
     def __init__(self, table) -> None:
         super().__init__(table)
         self._scan_index_forward = True
+
+    def asc(self):
+        self._scan_index_forward = True
+        return self
+
+    def desc(self):
+        self._scan_index_forward = False
+        return self
 
     def _create_requests(self):
         requests = super()._create_requests()
