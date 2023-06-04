@@ -30,46 +30,45 @@ def init_modules(request: Type[FixtureRequest], monkeypatch: MonkeyPatch):
         table.put_item(Item=d)
         for d in data.read_json("database/database", float_as=Decimal)
     ]
-
     request.instance.init = (data, table)
-
     yield
-
     mock.stop()
 
 
 class TestWrapper:
     """DynamoDB Wrapper"""
 
-    @mark.skip(reason="Recreate")
-    def test_case_count1(self):
-        """Count1"""
+    class TestCount:
+        """Count"""
 
-        # Init modules
-        _, table = self.init
-        db = DynamoChain(table)
-        # Execute
-        actual = db.count()
-        # Confirm
-        expected = 4
-        assert expected == actual
+        def test_case_1(self):
+            """With Scan"""
 
-    @mark.skip(reason="Recreate")
-    def test_case_count2(self):
-        """Count2"""
+            # Init modules
+            _, table = self.init
+            # Execute
+            actual = Scan(table).count()
+            # Confirm
+            expected = 4
+            assert expected == actual
 
-        # Init modules
-        _, table = self.init
-        db = DynamoChain(table)
-        # Execute
-        actual = (
-            db.filter(Attr("LastPostedBy").eq("User A"))
-            .and_.filter(Attr("Views").eq(1))
-            .count_all()
-        )
-        # Confirm
-        expected = 1
-        assert expected == actual
+        def test_case_2(self):
+            """With Query"""
+
+            # Init modules
+            _, table = self.init
+            # Execute
+            actual = (
+                Query(table)
+                .partition_key_exp(Key("ForumName").eq("Amazon S3"))
+                .sort_key_exp(Key("Subject").gte("S3 Thread 2"))
+                .filter_exp(Attr("LastPostedBy").eq("User A"))
+                .filter_exp(Attr("Views").eq(1))
+                .count()
+            )
+            # Confirm
+            expected = 1
+            assert expected == actual
 
     class TestScan:
         """Scan"""
@@ -113,8 +112,8 @@ class TestWrapper:
             # Execute
             actual = (
                 Query(table)
-                .key_condition_exp(Key("ForumName").eq("Amazon DynamoDB"))
-                .key_condition_exp(Key("Subject").gte("DynamoDB Thread 1"))
+                .partition_key_exp(Key("ForumName").eq("Amazon DynamoDB"))
+                .sort_key_exp(Key("Subject").gte("DynamoDB Thread 1"))
                 .filter_exp(Attr("LastPostedBy").eq("User A") | Attr("Views").eq(0))
                 .limit(2)
                 .desc()

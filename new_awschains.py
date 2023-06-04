@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from itertools import chain
 from conditions import ChainsConditionBuilder
-from boto3.dynamodb.conditions import ComparisonCondition
+from boto3.dynamodb.conditions import ComparisonCondition, Equals
 
 
 class AccessorBase(metaclass=ABCMeta):
@@ -57,6 +57,7 @@ class MultiReadBase(ReadBase):
         super().__init__(table)
         self._filter_exp = ""
         self._limit = None
+        self._select = ""
         self._exclusive_start_key = None
 
     def limit(self, value: int):
@@ -70,6 +71,10 @@ class MultiReadBase(ReadBase):
             self._filter_exp = fe
         return self
 
+    def select(self, value: str):
+        self._select = value
+        return self
+
     def _create_requests(self):
         requests = {}
         if self._key_condition_exp:
@@ -81,12 +86,18 @@ class MultiReadBase(ReadBase):
             requests["FilterExpression"] = self._filter_exp
         if self._limit:
             requests["Limit"] = self._limit
+        if self._select:
+            requests["Select"] = self._select
         if self._exclusive_start_key:
             requests["ExclusiveStartKey"] = self._exclusive_start_key
         return requests
 
     def run(self):
         return list(chain(*[record["Items"] for record in self.iter()]))
+
+    def count(self):
+        self.select("COUNT")
+        return sum([record["Count"] for record in self.iter()])
 
     @abstractmethod
     def iter(self):
@@ -116,6 +127,12 @@ class Query(MultiReadBase):
         else:
             self._key_condition_exp = value
         return self
+
+    def partition_key_exp(self, value: Equals):
+        return self.key_condition_exp(value)
+
+    def sort_key_exp(self, value: ComparisonCondition):
+        return self.key_condition_exp(value)
 
     def asc(self):
         self._scan_index_forward = True
