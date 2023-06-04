@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from itertools import chain
 from conditions import ChainsConditionBuilder
+from boto3.dynamodb.conditions import ComparisonCondition
 
 
 class AccessorBase(metaclass=ABCMeta):
@@ -23,13 +24,6 @@ class ReadBase(AccessorBase):
         self._key_condition_exp = None
         self._projection_exps = []
         self._consistent_read = False
-
-    def key_condition_exp(self, value):
-        if self._key_condition_exp:
-            self._key_condition_exp &= value
-        else:
-            self._key_condition_exp = value
-        return self
 
     def projection_exp(self, pe: str):
         self._projection_exps.extend([x.strip() for x in pe.split(",")])
@@ -115,6 +109,13 @@ class Query(MultiReadBase):
     def __init__(self, table) -> None:
         super().__init__(table)
         self._scan_index_forward = True
+
+    def key_condition_exp(self, value: ComparisonCondition):
+        if self._key_condition_exp:
+            self._key_condition_exp &= value
+        else:
+            self._key_condition_exp = value
+        return self
 
     def asc(self):
         self._scan_index_forward = True
