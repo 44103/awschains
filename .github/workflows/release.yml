@@ -13,6 +13,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: main
+          fetch-depth: 0
 
       - name: Check tagged branch
         working-directory: ./.github/workflows
