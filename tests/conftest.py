@@ -1,3 +1,8 @@
+import sys
+
+sys.path.append("../")
+
+
 def pytest_itemcollected(item):
     def collect_nodes(item, nodes=[]):
         if not (hasattr(item, "parent") and hasattr(item.parent, "obj")):

@@ -4,12 +4,7 @@ from moto import mock_dynamodb
 from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
 from pytest import FixtureRequest, MonkeyPatch, fixture, mark, raises
-import sys
-
-sys.path.append("../")
-
-from awschains import DynamoChain
-from new_awschains import Query, Scan
+from src.awschains.dynamochain import Query, Scan
 
 
 @fixture(autouse=True)
