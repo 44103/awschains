@@ -8,7 +8,7 @@ import sys
 
 sys.path.append("../")
 
-from awschains import DynamoChain
+from src.awschains.dynamochain import DynamoChain
 
 
 @fixture(autouse=True)
@@ -186,10 +186,7 @@ class TestWrapper:
             "Views": 2,
             "Replies": 0,
             "Answered": 0,
-            "Tags": [
-            "largeobjects",
-            "multipart upload"
-            ]
+            "Tags": ["largeobjects", "multipart upload"],
         }
         db.put(item)
         # 結果確認
@@ -215,14 +212,11 @@ class TestWrapper:
             "Views": 2,
             "Replies": 0,
             "Answered": 0,
-            "Tags": [
-            "largeobjects",
-            "multipart upload"
-            ]
+            "Tags": ["largeobjects", "multipart upload"],
         }
-        db.condition(Key("ForumName").eq("Amazon S3"))\
-        .condition(Key("Subject").eq("S3 Thread 2"))\
-        .put(item)
+        db.condition(Key("ForumName").eq("Amazon S3")).condition(
+            Key("Subject").eq("S3 Thread 2")
+        ).put(item)
         # 結果確認
         db.clear()
         actual = db.scan()
@@ -246,16 +240,13 @@ class TestWrapper:
             "Views": 2,
             "Replies": 0,
             "Answered": 0,
-            "Tags": [
-            "largeobjects",
-            "multipart upload"
-            ]
+            "Tags": ["largeobjects", "multipart upload"],
         }
         with raises(ClientError) as e:
-            db.condition(Key("ForumName").eq("Amazon S3"))\
-            .condition(Key("Subject").eq("S3 Thread 3"))\
-            .put(item)
+            db.condition(Key("ForumName").eq("Amazon S3")).condition(
+                Key("Subject").eq("S3 Thread 3")
+            ).put(item)
         # 結果確認
-        actual =  e.typename
+        actual = e.typename
         expected = "ConditionalCheckFailedException"
         assert actual == expected
