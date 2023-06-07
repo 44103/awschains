@@ -14,19 +14,17 @@ AWS Chains is a wrapper for writing boto3 as method chain.
 
 ### How to Use
 
-1. Create instance
-   ```python
-   db = DynamoChain(table)
-   ```
 1. Query to DynamoDB
    ```python
    result = (
-      db.key_condition(Key("ForumName").eq("Amazon DynamoDB"))
-      .key_condition(Key("Subject").gte("DynamoDB Thread 1"))
-      .filter(Attr("LastPostedBy").eq("User A"))
-      .or_.filter(Attr("Views").eq(0))
-      .limit(2)
-      .desc()
-      .query_all()
+       Query(table)
+       .partition_key_exp(Key("ForumName").eq("Amazon S3"))
+       .sort_key_exp(Key("Subject").gte("S3 Thread 2"))
+       .filter_exp(Attr("LastPostedBy").eq("User A"))
+       .filter_exp(Attr("Views").eq(1))
+       .projection_exp("ForumName, Subject, Message")
+       .projection_exp("LastPostedBy, LastPostedDateTime, Views")
+       .desc()
+       .run()
    )
    ```
