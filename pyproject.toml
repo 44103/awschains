@@ -5,21 +5,17 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "awschains"
 readme = "README.md"
-license = {file = "LICENSE"}
-classifiers = [
-    "Programming Language :: Python :: 3.9",
-]
+license = { file = "LICENSE" }
+classifiers = ["Programming Language :: Python :: 3.9"]
 requires-python = "==3.9.*"
-dependencies = [
-    "boto3~=1.26"
-]
+dependencies = ["boto3~=1.26"]
 dynamic = ["version"]
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+package-dir = { include = "src" }
 
 [tool.setuptools.dynamic]
-version = {attr = "awschains._version.version"}
+version = { attr = "awschains._version.version" }
 
 [tool.setuptools_scm]
 write_to = "src/awschains/_version.py"
@@ -27,10 +23,4 @@ version_scheme = "python-simplified-semver"
 local_scheme = "no-local-version"
 
 [project.optional-dependencies]
-dev = [
-    "pytest",
-    "flake8",
-    "mypy",
-    "black",
-    "isort"
-]
+dev = ["pytest", "flake8", "mypy", "black", "isort"]

@@ -1,134 +1,155 @@
-import operator
+from abc import ABCMeta, abstractmethod
+from itertools import chain
 from conditions import ChainsConditionBuilder
+from boto3.dynamodb.conditions import ComparisonCondition, Equals
 
-class DynamoChain:
+
+class AccessorBase(metaclass=ABCMeta):
     def __init__(self, table) -> None:
         self._table = table
-        self._query = {}
-        self._operator = operator.and_
+        self._return_consumed_capacity = "NONE"
 
-    def _check_next_query(self, resp):
-        if "LastEvaluetedKey" in resp:
-            self._query["ExclusiveStartKey"] = resp["LastEvaluetedKey"]
+    def return_consumed_capacity(self, value: str):
+        self._return_consumed_capacity = value
+        return self
+
+    @abstractmethod
+    def run(self):
+        pass
+
+
+class ReadBase(AccessorBase):
+    def __init__(self, table) -> None:
+        super().__init__(table)
+        self._key_condition_exp = None
+        self._projection_exps = []
+        self._consistent_read = False
+
+    def projection_exp(self, pe: str):
+        self._projection_exps.extend([x.strip() for x in pe.split(",")])
+        return self
+
+    def consistent_read(self, cr: bool = True):
+        self._consistent_read = cr
+        return self
+
+    @abstractmethod
+    def run(self):
+        pass
+
+
+class WriteBase(AccessorBase):
+    def __init__(self, table) -> None:
+        super().__init__(table)
+        self._condition_exp = ""
+
+    def condition_exp(self, ce: str):
+        self._condition_exp(ce)
+        return self
+
+    @abstractmethod
+    def run(self):
+        pass
+
+
+class MultiReadBase(ReadBase):
+    def __init__(self, table) -> None:
+        super().__init__(table)
+        self._filter_exp = ""
+        self._limit = None
+        self._select = ""
+        self._exclusive_start_key = None
+
+    def limit(self, value: int):
+        self._limit = value
+        return self
+
+    def filter_exp(self, fe):
+        if self._filter_exp:
+            self._filter_exp &= fe
         else:
-            self._query.pop("ExclusiveStartKey", None)
-
-    def clear(self):
-        self._query = {}
-        self._operator = operator.and_
-
-    @property
-    def and_(self):
-        self._operator = operator.and_
+            self._filter_exp = fe
         return self
 
-    @property
-    def or_(self):
-        self._operator = operator.or_
+    def select(self, value: str):
+        self._select = value
         return self
 
-    @property
-    def done(self):
-        return not "ExclusiveStartKey" in self._query
+    def _create_requests(self):
+        requests = {}
+        if self._key_condition_exp:
+            requests["KeyConditionExpression"] = self._key_condition_exp
+        if self._projection_exps:
+            requests["ProjectionExpression"] = ",".join(self._projection_exps)
+        requests["ConsistentRead"] = self._consistent_read
+        if self._filter_exp:
+            requests["FilterExpression"] = self._filter_exp
+        if self._limit:
+            requests["Limit"] = self._limit
+        if self._select:
+            requests["Select"] = self._select
+        if self._exclusive_start_key:
+            requests["ExclusiveStartKey"] = self._exclusive_start_key
+        return requests
 
-    # Chain Method
-    def key_condition(self, kce):
-        if "KeyConditionExpression" in self._query:
-            self._query["KeyConditionExpression"] &= kce
+    def run(self):
+        return list(chain(*[record["Items"] for record in self.iter()]))
+
+    def count(self):
+        self.select("COUNT")
+        return sum([record["Count"] for record in self.iter()])
+
+    @abstractmethod
+    def iter(self):
+        pass
+
+
+class Scan(MultiReadBase):
+    def __init__(self, table) -> None:
+        super().__init__(table)
+
+    def iter(self):
+        requests = self._create_requests()
+        response = self._table.scan(**ChainsConditionBuilder(requests).boto3_query)
+        if "LastEvaluetedKey" in response:
+            self._exclusive_start_key = response["LastEvaluetedKey"]
+        yield response
+
+
+class Query(MultiReadBase):
+    def __init__(self, table) -> None:
+        super().__init__(table)
+        self._scan_index_forward = True
+
+    def key_condition_exp(self, value: ComparisonCondition):
+        if self._key_condition_exp:
+            self._key_condition_exp &= value
         else:
-            self._query["KeyConditionExpression"] = kce
+            self._key_condition_exp = value
         return self
 
-    def filter(self, fe):
-        if "FilterExpression" in self._query:
-            self._query["FilterExpression"] = self._operator(
-                self._query["FilterExpression"], fe
-            )
-        else:
-            self._query["FilterExpression"] = fe
-        return self
+    def partition_key_exp(self, value: Equals):
+        return self.key_condition_exp(value)
 
-    def limit(self, num):
-        self._query["Limit"] = num
-        return self
+    def sort_key_exp(self, value: ComparisonCondition):
+        return self.key_condition_exp(value)
 
     def asc(self):
-        self._query["ScanIndexForward"] = True
+        self._scan_index_forward = True
         return self
 
     def desc(self):
-        self._query["ScanIndexForward"] = False
+        self._scan_index_forward = False
         return self
 
-    def key(self, key, value):
-        if "Key" in self._query:
-            self._query["Key"] |= {key: value}
-        else:
-            self._query["Key"] = {key: value}
-        return self
+    def _create_requests(self):
+        requests = super()._create_requests()
+        requests["ScanIndexForward"] = self._scan_index_forward
+        return requests
 
-    def consistent_read(self, cr=True):
-        self._query["ConsistentRead"] = cr
-        return self
-
-    def projection(self, pe):
-        if "ProjectionExpression" in self._query:
-            self._query["ProjectionExpression"] += ',' + pe
-        else:
-            self._query["ProjectionExpression"] = pe
-        return self
-
-    def condition(self, ce):
-        if "ConditionExpression" in self._query:
-            self._query["ConditionExpression"] = self._operator(
-                self._query["ConditionExpression"], ce
-            )
-        else:
-            self._query["ConditionExpression"] = ce
-        return self
-
-    # Last Method
-    def count(self):
-        self._query["Select"] = "COUNT"
-        resp = self._table.scan(**ChainsConditionBuilder(self._query).query)
-        self._check_next_query(resp)
-        count = resp["Count"]
-        return count
-
-    def count_all(self):
-        resp = self.count()
-        while not self.done:
-            resp += self.count()
-        return resp
-
-    def scan(self):
-        resp = self._table.scan(**ChainsConditionBuilder(self._query).query)
-        self._check_next_query(resp)
-        return resp["Items"]
-
-    def scan_all(self):
-        resp = self.scan()
-        while not self.done:
-            resp += self.scan()
-        return resp
-
-    def query(self):
-        resp = self._table.query(**ChainsConditionBuilder(self._query).query)
-        self._check_next_query(resp)
-        return resp["Items"]
-
-    def query_all(self):
-        resp = self.query()
-        while not self.done:
-            resp += self.query()
-        return resp
-
-    def delete(self):
-        self._table.delete_item(**ChainsConditionBuilder(self._query).query)
-
-    def get(self):
-        return self._table.get_item(**ChainsConditionBuilder(self._query).query)["Item"]
-
-    def put(self, item):
-        self._query["Item"] = item
-        self._table.put_item(**ChainsConditionBuilder(self._query).query)
+    def iter(self):
+        requests = self._create_requests()
+        response = self._table.query(**ChainsConditionBuilder(requests).boto3_query)
+        if "LastEvaluetedKey" in response:
+            self._exclusive_start_key = response["LastEvaluetedKey"]
+        yield response

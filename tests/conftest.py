@@ -1,3 +1,8 @@
+import sys
+
+sys.path.append("../")
+
+
 def pytest_itemcollected(item):
     def collect_nodes(item, nodes=[]):
         if not (hasattr(item, "parent") and hasattr(item.parent, "obj")):
@@ -7,4 +12,4 @@ def pytest_itemcollected(item):
 
     nodes = collect_nodes(item)[::-1]
     node_ids = (x.__doc__.strip() if x.__doc__ else x.__name__ for x in nodes)
-    item._nodeid = ":".join(node_ids)
+    item._nodeid = " :> ".join(node_ids)

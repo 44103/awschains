@@ -1,30 +1,30 @@
-
 [EN](./README.md) | JA
 
 [![License](https://img.shields.io/badge/Apache-2.0-D22128?logo=apache)](LICENSE)
 [![Language](https://img.shields.io/badge/Python-3.9-3776AB?logo=python)](https://hub.docker.com/layers/library/python/3.9/images/sha256-c65dadac8789fed40962578392e99a0528dcb868442c75d144e68ba858984837?context=explore)
-[![CI](https://github.com/44103/awschains/actions/workflows/main.yml/badge.svg)](https://github.com/44103/awschains/actions/workflows/main.yml)
+[![Test](https://github.com/44103/awschains/actions/workflows/test.yml/badge.svg)](https://github.com/44103/awschains/actions/workflows/test.yml)
 
------
+---
 
 # AWS Chains
-AWS Chainsはboto3をメソッドチェーンで記述するためのラッパーです。
+
+AWS Chains は boto3 をメソッドチェーンで記述するためのラッパーです。
 
 ## DynamoChain
+
 ### 使い方
-1. インスタンス作成
-   ```python
-   db = DynamoChain(table)
-   ```
-1. DynamoDBにクエリ
+
+1. DynamoDB にクエリ
    ```python
    result = (
-      db.key_condition(Key("ForumName").eq("Amazon DynamoDB"))
-      .key_condition(Key("Subject").gte("DynamoDB Thread 1"))
-      .filter(Attr("LastPostedBy").eq("User A"))
-      .or_.filter(Attr("Views").eq(0))
-      .limit(2)
-      .desc()
-      .query_all()
+       Query(table)
+       .partition_key_exp(Key("ForumName").eq("Amazon S3"))
+       .sort_key_exp(Key("Subject").gte("S3 Thread 2"))
+       .filter_exp(Attr("LastPostedBy").eq("User A"))
+       .filter_exp(Attr("Views").eq(1))
+       .projection_exp("ForumName, Subject, Message")
+       .projection_exp("LastPostedBy, LastPostedDateTime, Views")
+       .desc()
+       .run()
    )
    ```
