@@ -1,7 +1,9 @@
 from abc import ABCMeta, abstractmethod
 from itertools import chain
-from conditions import ChainsConditionBuilder
+
 from boto3.dynamodb.conditions import ComparisonCondition, Equals
+
+from conditions import ChainsConditionBuilder
 
 
 class AccessorBase(metaclass=ABCMeta):
