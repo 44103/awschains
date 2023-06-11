@@ -180,7 +180,7 @@ class TestWrapper:
             # Init modules
             data, table = self.init
             # Execute
-            actual = (
+            (
                 PutItem(table)
                 .partition_key("ForumName", "Amazon S3")
                 .sort_key("Subject", "S3 Thread 3")
@@ -204,7 +204,7 @@ class TestWrapper:
             # Init modules
             data, table = self.init
             # Execute
-            actual = (
+            (
                 PutItem(table)
                 .attr(
                     {
@@ -232,7 +232,7 @@ class TestWrapper:
             # Init modules
             data, table = self.init
             # Execute
-            actual = (
+            (
                 PutItem(table)
                 .partition_key("ForumName", "Amazon S3")
                 .sort_key("Subject", "S3 Thread 2")
@@ -260,7 +260,7 @@ class TestWrapper:
             # Init modules
             data, table = self.init
             # Execute
-            actual = (
+            (
                 PutItem(table)
                 .partition_key(Key("ForumName").eq("Amazon S3"))
                 .sort_key(Key("Subject").eq("S3 Thread 2"))
