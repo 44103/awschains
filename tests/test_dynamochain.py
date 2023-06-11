@@ -251,5 +251,33 @@ class TestWrapper:
             )
             # Confirm
             actual = Scan(table).run()
-            expected = data.read_json("data/expected_put3", float_as=Decimal)
+            expected = data.read_json("data/expected_put3-4", float_as=Decimal)
+            assert expected == actual
+
+        def test_case_4(self):
+            """Set partition and sort key via key condition"""
+
+            # Init modules
+            data, table = self.init
+            # Execute
+            actual = (
+                PutItem(table)
+                .partition_key(Key("ForumName").eq("Amazon S3"))
+                .sort_key(Key("Subject").eq("S3 Thread 2"))
+                .attr(
+                    {
+                        "Message": "S3 thread 2 message",
+                        "LastPostedBy": "User A",
+                        "LastPostedDateTime": "2015-09-29T19:58:22.514Z",
+                        "Views": 2,
+                        "Replies": 0,
+                        "Answered": 0,
+                        "Tags": ["largeobjects", "multipart upload"],
+                    }
+                )
+                .run()
+            )
+            # Confirm
+            actual = Scan(table).run()
+            expected = data.read_json("data/expected_put3-4", float_as=Decimal)
             assert expected == actual

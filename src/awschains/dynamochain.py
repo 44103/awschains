@@ -165,11 +165,21 @@ class PutItem(WriteBase):
         self._item |= {key: value}
         return self
 
-    def partition_key(self, key, value):
+    @singledispatchmethod
+    def partition_key(self, key: str, value: str):
         return self.item(key, value)
 
-    def sort_key(self, key, value):
+    @singledispatchmethod
+    def sort_key(self, key: str, value: str):
         return self.item(key, value)
+
+    @partition_key.register
+    @sort_key.register
+    def _(self, value: Equals):
+        expression = value.get_expression()
+        key = expression["values"][0].name
+        val = expression["values"][1]
+        return self.item(key, val)
 
     @singledispatchmethod
     def attr(self, key: str, value: str):
