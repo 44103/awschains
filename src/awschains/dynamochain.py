@@ -153,3 +153,25 @@ class Query(MultiReadBase):
         if "LastEvaluetedKey" in response:
             self._exclusive_start_key = response["LastEvaluetedKey"]
         yield response
+
+
+class PutItem(WriteBase):
+    def __init__(self, table) -> None:
+        super().__init__(table)
+        self._item = {}
+
+    def item(self, key, value):
+        self._item |= {key: value}
+        return self
+
+    def partition_key(self, key, value):
+        return self.item(key, value)
+
+    def sort_key(self, key, value):
+        return self.item(key, value)
+
+    def attr(self, key, value):
+        return self.item(key, value)
+
+    def run(self):
+        self._table.put_item(Item=self._item)

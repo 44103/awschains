@@ -4,7 +4,7 @@ from moto import mock_dynamodb
 from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
 from pytest import FixtureRequest, MonkeyPatch, fixture, mark, raises
-from src.awschains.dynamochain import Query, Scan
+from src.awschains.dynamochain import PutItem, Query, Scan
 
 
 @fixture(autouse=True)
@@ -171,6 +171,33 @@ class TestWrapper:
         # Confirm
         expected = data.read_json("data/expected_get", float_as=Decimal)
         assert expected == actual
+
+    class TestPutItem:
+        """PutItem"""
+
+        def test_case_1(self):
+            """Add data via key-value"""
+
+            # Init modules
+            data, table = self.init
+            # Execute
+            actual = (
+                PutItem(table)
+                .partition_key("ForumName", "Amazon S3")
+                .sort_key("Subject", "S3 Thread 3")
+                .attr("Message", "S3 thread 3 message")
+                .attr("LastPostedBy", "User A")
+                .attr("LastPostedDateTime", "2015-09-29T19:58:22.514Z")
+                .attr("Views", 2)
+                .attr("Replies", 0)
+                .attr("Answered", 0)
+                .attr("Tags", ["largeobjects", "multipart upload"])
+                .run()
+            )
+            # Confirm
+            actual = Scan(table).run()
+            expected = data.read_json("data/expected_put1", float_as=Decimal)
+            assert expected == actual
 
     @mark.skip(reason="Recreate")
     def test_case_put1(self):
