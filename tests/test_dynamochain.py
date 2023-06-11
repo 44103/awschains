@@ -199,6 +199,34 @@ class TestWrapper:
             expected = data.read_json("data/expected_put1", float_as=Decimal)
             assert expected == actual
 
+        def test_case_2(self):
+            """Add data via dict"""
+
+            # Init modules
+            data, table = self.init
+            # Execute
+            actual = (
+                PutItem(table)
+                .attr(
+                    {
+                        "ForumName": "Amazon S3",
+                        "Subject": "S3 Thread 3",
+                        "Message": "S3 thread 3 message",
+                        "LastPostedBy": "User A",
+                        "LastPostedDateTime": "2015-09-29T19:58:22.514Z",
+                        "Views": 2,
+                        "Replies": 0,
+                        "Answered": 0,
+                        "Tags": ["largeobjects", "multipart upload"],
+                    }
+                )
+                .run()
+            )
+            # Confirm
+            actual = Scan(table).run()
+            expected = data.read_json("data/expected_put1", float_as=Decimal)
+            assert expected == actual
+
     @mark.skip(reason="Recreate")
     def test_case_put1(self):
         """Put1"""

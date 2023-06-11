@@ -2,6 +2,7 @@ from abc import ABCMeta, abstractmethod
 from itertools import chain
 from conditions import ChainsConditionBuilder
 from boto3.dynamodb.conditions import ComparisonCondition, Equals
+from functools import singledispatchmethod
 
 
 class AccessorBase(metaclass=ABCMeta):
@@ -170,8 +171,20 @@ class PutItem(WriteBase):
     def sort_key(self, key, value):
         return self.item(key, value)
 
-    def attr(self, key, value):
+    @singledispatchmethod
+    def attr(self, key: str, value: str):
         return self.item(key, value)
+
+    @attr.register
+    def _(self, value: dict):
+        self._item |= value
+        return self
+
+    def partition_key_exp(self, value):
+        return self.key_condition_exp(value)
+
+    def sort_key_exp(self, value: ComparisonCondition):
+        return self.key_condition_exp(value)
 
     def run(self):
         self._table.put_item(Item=self._item)
