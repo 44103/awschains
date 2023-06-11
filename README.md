@@ -28,3 +28,9 @@ AWS Chains is a wrapper for writing boto3 as method chain.
        .run()
    )
    ```
+
+### Signature Feature
+
+#### Code Completion
+
+![img](./img/code-completion.gif)

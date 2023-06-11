@@ -28,3 +28,9 @@ AWS Chains は boto3 をメソッドチェーンで記述するためのラッ�
        .run()
    )
    ```
+
+### 特徴機能
+
+#### コード補完
+
+![img](./img/code-completion.gif)
