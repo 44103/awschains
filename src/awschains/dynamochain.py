@@ -29,12 +29,12 @@ class ReadBase(AccessorBase):
         self._projection_exps = []
         self._consistent_read = False
 
-    def projection_exp(self, pe: str):
-        self._projection_exps.extend([x.strip() for x in pe.split(",")])
+    def projection_exp(self, value: str):
+        self._projection_exps.extend([x.strip() for x in value.split(",")])
         return self
 
-    def consistent_read(self, cr: bool = True):
-        self._consistent_read = cr
+    def consistent_read(self, value: bool = True):
+        self._consistent_read = value
         return self
 
     @abstractmethod
@@ -47,11 +47,11 @@ class WriteBase(AccessorBase):
         super().__init__(table)
         self._condition_exp = None
 
-    def condition_exp(self, ce: ComparisonCondition):
+    def condition_exp(self, value: ComparisonCondition):
         if self._condition_exp:
-            self._condition_exp &= ce
+            self._condition_exp &= value
         else:
-            self._condition_exp = ce
+            self._condition_exp = value
         return self
 
     @abstractmethod
@@ -71,11 +71,11 @@ class MultiReadBase(ReadBase):
         self._limit = value
         return self
 
-    def filter_exp(self, fe):
+    def filter_exp(self, value):
         if self._filter_exp:
-            self._filter_exp &= fe
+            self._filter_exp &= value
         else:
-            self._filter_exp = fe
+            self._filter_exp = value
         return self
 
     def select(self, value: str):
@@ -192,8 +192,8 @@ class PutItem(WriteBase):
         return self.item(key, value)
 
     @attr.register
-    def _(self, value: dict):
-        self._item |= value
+    def _(self, item: dict):
+        self._item |= item
         return self
 
     def run(self):
