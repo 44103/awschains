@@ -2,8 +2,9 @@ from decimal import Decimal
 from typing import Type
 from moto import mock_dynamodb
 from boto3.dynamodb.conditions import Key, Attr
-from pytest import FixtureRequest, MonkeyPatch, fixture, mark
+from pytest import FixtureRequest, MonkeyPatch, fixture, mark, raises
 from src.awschains.dynamochain import PutItem, Query, Scan
+from botocore.exceptions import ClientError
 
 
 @fixture(autouse=True)
@@ -280,4 +281,35 @@ class TestWrapper:
             # Confirm
             actual = Scan(table).run()
             expected = data.read_json("data/expected_put3-4", float_as=Decimal)
+            assert expected == actual
+
+        def test_case_5(self):
+            """Not match condition"""
+
+            # Init modules
+            _, table = self.init
+            # Execute
+            with raises(ClientError) as e:
+                (
+                    PutItem(table)
+                    .partition_key(Key("ForumName").eq("Amazon S3"))
+                    .sort_key(Key("Subject").eq("S3 Thread 3"))
+                    .attr(
+                        {
+                            "Message": "S3 thread 3 message",
+                            "LastPostedBy": "User A",
+                            "LastPostedDateTime": "2015-09-29T19:58:22.514Z",
+                            "Views": 2,
+                            "Replies": 0,
+                            "Answered": 0,
+                            "Tags": ["largeobjects", "multipart upload"],
+                        }
+                    )
+                    .condition_exp(Attr("ForumName").eq("Amazon S3"))
+                    .condition_exp(Attr("Subject").eq("S3 Thread 2"))
+                    .run()
+                )
+            # Confirm
+            actual = e.typename
+            expected = "ConditionalCheckFailedException"
             assert expected == actual

@@ -1,7 +1,10 @@
 from abc import ABCMeta, abstractmethod
 from itertools import chain
 from conditions import ChainsConditionBuilder
-from boto3.dynamodb.conditions import ComparisonCondition, Equals
+from boto3.dynamodb.conditions import (
+    ComparisonCondition,
+    Equals,
+)
 from functools import singledispatchmethod
 
 
@@ -42,10 +45,13 @@ class ReadBase(AccessorBase):
 class WriteBase(AccessorBase):
     def __init__(self, table) -> None:
         super().__init__(table)
-        self._condition_exp = ""
+        self._condition_exp = None
 
-    def condition_exp(self, ce: str):
-        self._condition_exp(ce)
+    def condition_exp(self, ce: ComparisonCondition):
+        if self._condition_exp:
+            self._condition_exp &= ce
+        else:
+            self._condition_exp = ce
         return self
 
     @abstractmethod
@@ -191,4 +197,7 @@ class PutItem(WriteBase):
         return self
 
     def run(self):
-        self._table.put_item(Item=self._item)
+        requests = {"Item": self._item}
+        if self._condition_exp:
+            requests["ConditionExpression"] = self._condition_exp
+        self._table.put_item(**requests)
