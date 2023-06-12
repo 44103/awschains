@@ -190,11 +190,5 @@ class PutItem(WriteBase):
         self._item |= value
         return self
 
-    def partition_key_exp(self, value):
-        return self.key_condition_exp(value)
-
-    def sort_key_exp(self, value: ComparisonCondition):
-        return self.key_condition_exp(value)
-
     def run(self):
         self._table.put_item(Item=self._item)
