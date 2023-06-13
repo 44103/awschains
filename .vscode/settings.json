@@ -17,5 +17,8 @@
   ],
   "cSpell.ignorePaths": [
     "**/*.json",
-  ]
+  ],
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  }
 }
