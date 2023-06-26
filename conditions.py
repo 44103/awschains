@@ -1,4 +1,4 @@
-from boto3.dynamodb.conditions import ConditionExpressionBuilder, Attr
+from boto3.dynamodb.conditions import Attr, ConditionExpressionBuilder
 
 
 class ChainsCondition:

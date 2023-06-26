@@ -1,4 +1,24 @@
 {
   "editor.formatOnSave": true,
   "python.formatting.provider": "black",
+  "cSpell.words": [
+    "autouse",
+    "awschains",
+    "boto",
+    "botocore",
+    "dynamochain",
+    "itemcollected",
+    "moto",
+    "nodeid",
+    "pypa",
+    "pypi",
+    "pytest",
+    "setenv"
+  ],
+  "cSpell.ignorePaths": [
+    "**/*.json",
+  ],
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  }
 }

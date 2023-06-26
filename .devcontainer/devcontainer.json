@@ -1,22 +1,24 @@
 {
-	"name": "python3.9",
-	"dockerComposeFile": "docker-compose.yml",
-	"settings": {
-		"terminal.integrated.defaultProfile.linux": "zsh"
-	},
-	"extensions": [
-		"formulahendry.terminal",
-		"fabiospampinato.vscode-todo-plus",
-		"shardulm94.trailing-spaces",
-		"patbenatar.advanced-new-file",
-		"sleistner.vscode-fileutils",
-		"mhutchie.git-graph",
-		"ms-python.python",
-		"esbenp.prettier-vscode",
-		"eamodio.gitlens",
-		"bungcip.better-toml"
-	],
-	"service": "python",
-	"workspaceFolder": "/workdir",
-	"shutdownAction": "stopCompose"
+  "name": "python3.9",
+  "dockerComposeFile": "docker-compose.yml",
+  "settings": {
+    "terminal.integrated.defaultProfile.linux": "zsh"
+  },
+  "extensions": [
+    "formulahendry.terminal",
+    "fabiospampinato.vscode-todo-plus",
+    "shardulm94.trailing-spaces",
+    "patbenatar.advanced-new-file",
+    "sleistner.vscode-fileutils",
+    "mhutchie.git-graph",
+    "ms-python.python",
+    "esbenp.prettier-vscode",
+    "eamodio.gitlens",
+    "shd101wyy.markdown-preview-enhanced",
+    "tamasfe.even-better-toml",
+    "streetsidesoftware.code-spell-checker"
+  ],
+  "service": "python",
+  "workspaceFolder": "/workdir",
+  "shutdownAction": "stopCompose"
 }

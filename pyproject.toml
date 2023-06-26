@@ -22,5 +22,8 @@ write_to = "src/awschains/_version.py"
 version_scheme = "python-simplified-semver"
 local_scheme = "no-local-version"
 
+[tool.isort]
+profile = "black"
+
 [project.optional-dependencies]
 dev = ["pytest", "flake8", "mypy", "black", "isort"]
