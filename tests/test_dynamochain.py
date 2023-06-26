@@ -1,9 +1,11 @@
 from decimal import Decimal
 from typing import Type
-from moto import mock_dynamodb
-from boto3.dynamodb.conditions import Key, Attr
+
+from boto3.dynamodb.conditions import Attr, Key
 from botocore.exceptions import ClientError
+from moto import mock_dynamodb
 from pytest import FixtureRequest, MonkeyPatch, fixture, mark, raises
+
 from src.awschains.dynamochain import Query, Scan
 
 
