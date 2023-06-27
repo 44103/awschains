@@ -11,8 +11,8 @@ requires-python = "==3.9.*"
 dependencies = ["boto3~=1.26"]
 dynamic = ["version"]
 
-[tool.setuptools]
-package-dir = { include = "src" }
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.setuptools.dynamic]
 version = { attr = "awschains._version.version" }

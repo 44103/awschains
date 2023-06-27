@@ -1,18 +1,17 @@
 name: Pre Release
 
 on:
-  workflow_run:
-    workflows: ["Test"]
-    types:
-      - completed
   push:
     branches: ["main"]
 
 jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+
   deploy:
     runs-on: ubuntu-latest
+    needs: test
 
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v3
 

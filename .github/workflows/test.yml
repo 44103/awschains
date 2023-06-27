@@ -3,12 +3,9 @@ name: Test
 on:
   push:
     branches:
-      - "main"
-      - "feature/*"
+      - "feature/**"
 
-  pull_request:
-    branches:
-      - "main"
+  workflow_call:
 
   workflow_dispatch:
 
