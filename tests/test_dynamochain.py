@@ -6,7 +6,7 @@ from botocore.exceptions import ClientError
 from moto import mock_dynamodb
 from pytest import FixtureRequest, MonkeyPatch, fixture, mark, raises
 
-from src.awschains.dynamochain import Query, Scan
+from src.awschains.dynamochain import PutItem, Query, Scan
 
 
 @fixture(autouse=True)
@@ -174,88 +174,144 @@ class TestWrapper:
         expected = data.read_json("data/expected_get", float_as=Decimal)
         assert expected == actual
 
-    @mark.skip(reason="Recreate")
-    def test_case_put1(self):
-        """Put1"""
-        """Create a new item"""
+    class TestPutItem:
+        """PutItem"""
 
-        # Init modules
-        data, table = self.init
-        db = DynamoChain(table)
-        # Execute
+        def test_case_1(self):
+            """Add data via key-value"""
 
-        item = {
-            "ForumName": "Amazon S3",
-            "Subject": "S3 Thread 3",
-            "Message": "S3 thread 3 message",
-            "LastPostedBy": "User A",
-            "LastPostedDateTime": "2015-09-29T19:58:22.514Z",
-            "Views": 2,
-            "Replies": 0,
-            "Answered": 0,
-            "Tags": ["largeobjects", "multipart upload"],
-        }
-        db.put(item)
-        # Confirm
-        db.clear()
-        actual = db.scan()
-        expected = data.read_json("data/expected_put1", float_as=Decimal)
-        assert expected == actual
+            # Init modules
+            data, table = self.init
+            # Execute
+            (
+                PutItem(table)
+                .partition_key("ForumName", "Amazon S3")
+                .sort_key("Subject", "S3 Thread 3")
+                .attr("Message", "S3 thread 3 message")
+                .attr("LastPostedBy", "User A")
+                .attr("LastPostedDateTime", "2015-09-29T19:58:22.514Z")
+                .attr("Views", 2)
+                .attr("Replies", 0)
+                .attr("Answered", 0)
+                .attr("Tags", ["largeobjects", "multipart upload"])
+                .run()
+            )
+            # Confirm
+            actual = Scan(table).run()
+            expected = data.read_json("data/expected_put1-2", float_as=Decimal)
+            assert expected == actual
 
-    @mark.skip(reason="Recreate")
-    def test_case_put2(self):
-        """Put2"""
-        """Update existing items"""
+        def test_case_2(self):
+            """Add data via dict"""
 
-        # Init modules
-        data, table = self.init
-        db = DynamoChain(table)
-        # Execute
-        item = {
-            "ForumName": "Amazon S3",
-            "Subject": "S3 Thread 2",
-            "Message": "S3 thread 2 message",
-            "LastPostedBy": "User A",
-            "LastPostedDateTime": "2015-09-29T19:58:22.514Z",
-            "Views": 2,
-            "Replies": 0,
-            "Answered": 0,
-            "Tags": ["largeobjects", "multipart upload"],
-        }
-        db.condition(Key("ForumName").eq("Amazon S3")).condition(
-            Key("Subject").eq("S3 Thread 2")
-        ).put(item)
-        # Confirm
-        db.clear()
-        actual = db.scan()
-        expected = data.read_json("data/expected_put2", float_as=Decimal)
-        assert expected == actual
+            # Init modules
+            data, table = self.init
+            # Execute
+            (
+                PutItem(table)
+                .attr(
+                    {
+                        "ForumName": "Amazon S3",
+                        "Subject": "S3 Thread 3",
+                        "Message": "S3 thread 3 message",
+                        "LastPostedBy": "User A",
+                        "LastPostedDateTime": "2015-09-29T19:58:22.514Z",
+                        "Views": 2,
+                        "Replies": 0,
+                        "Answered": 0,
+                        "Tags": ["largeobjects", "multipart upload"],
+                    }
+                )
+                .run()
+            )
+            # Confirm
+            actual = Scan(table).run()
+            expected = data.read_json("data/expected_put1-2", float_as=Decimal)
+            assert expected == actual
 
-    @mark.skip(reason="Recreate")
-    def test_case_put3(self):
-        """Put3"""
-        """Non-existent item is not updated."""
+        def test_case_3(self):
+            """Overwrite a item"""
 
-        # Init modules
-        data, table = self.init
-        db = DynamoChain(table)
-        # Execute
-        item = {
-            "ForumName": "Amazon S3",
-            "Subject": "S3 Thread 3",
-            "Message": "S3 thread 3 message",
-            "LastPostedBy": "User A",
-            "LastPostedDateTime": "2015-09-29T19:58:22.514Z",
-            "Views": 2,
-            "Replies": 0,
-            "Answered": 0,
-            "Tags": ["largeobjects", "multipart upload"],
-        }
-        with raises(ClientError) as e:
-            db.condition(Key("ForumName").eq("Amazon S3")).condition(
-                Key("Subject").eq("S3 Thread 3")
-            ).put(item)
-        # Confirm
-        actual = e.typename
-        expected = "ConditionalCheckFailedException"
-        assert actual == expected
+            # Init modules
+            data, table = self.init
+            # Execute
+            (
+                PutItem(table)
+                .partition_key("ForumName", "Amazon S3")
+                .sort_key("Subject", "S3 Thread 2")
+                .attr(
+                    {
+                        "Message": "S3 thread 2 message",
+                        "LastPostedBy": "User A",
+                        "LastPostedDateTime": "2015-09-29T19:58:22.514Z",
+                        "Views": 2,
+                        "Replies": 0,
+                        "Answered": 0,
+                        "Tags": ["largeobjects", "multipart upload"],
+                    }
+                )
+                .run()
+            )
+            # Confirm
+            actual = Scan(table).run()
+            expected = data.read_json("data/expected_put3-4", float_as=Decimal)
+            assert expected == actual
+
+        def test_case_4(self):
+            """Set partition and sort key via key condition"""
+
+            # Init modules
+            data, table = self.init
+            # Execute
+            (
+                PutItem(table)
+                .partition_key(Key("ForumName").eq("Amazon S3"))
+                .sort_key(Key("Subject").eq("S3 Thread 2"))
+                .attr(
+                    {
+                        "Message": "S3 thread 2 message",
+                        "LastPostedBy": "User A",
+                        "LastPostedDateTime": "2015-09-29T19:58:22.514Z",
+                        "Views": 2,
+                        "Replies": 0,
+                        "Answered": 0,
+                        "Tags": ["largeobjects", "multipart upload"],
+                    }
+                )
+                .run()
+            )
+            # Confirm
+            actual = Scan(table).run()
+            expected = data.read_json("data/expected_put3-4", float_as=Decimal)
+            assert expected == actual
+
+        def test_case_5(self):
+            """Not match condition"""
+
+            # Init modules
+            _, table = self.init
+            # Execute
+            with raises(ClientError) as e:
+                (
+                    PutItem(table)
+                    .partition_key(Key("ForumName").eq("Amazon S3"))
+                    .sort_key(Key("Subject").eq("S3 Thread 3"))
+                    .attr(
+                        {
+                            "Message": "S3 thread 3 message",
+                            "LastPostedBy": "User A",
+                            "LastPostedDateTime": "2015-09-29T19:58:22.514Z",
+                            "Views": 2,
+                            "Replies": 0,
+                            "Answered": 0,
+                            "Tags": ["largeobjects", "multipart upload"],
+                        }
+                    )
+                    .condition_exp(Attr("ForumName").eq("Amazon S3"))
+                    .condition_exp(Attr("Subject").eq("S3 Thread 2"))
+                    .run()
+                )
+            # Confirm
+            actual = e.typename
+            expected = "ConditionalCheckFailedException"
+            assert expected == actual
