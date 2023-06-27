@@ -1,7 +1,7 @@
 import json
 import os
-import boto3
 
+import boto3
 
 AWS_DEFAULT_REGION = os.environ["AWS_DEFAULT_REGION"]
 SAMPLE_TABLE = os.environ["SAMPLE_TABLE"]
